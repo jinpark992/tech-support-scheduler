@@ -10,9 +10,9 @@
         <nav class="gnb">
             <a th:href="@{/support/home}"
                th:classappend="${activeMenu}=='home' ? ' active' : ''">대시보드</a>
-            <a th:href="@{/project/list}"
+            <a th:href="@{/support/project/list}"
                th:classappend="${activeMenu}=='project' ? ' active' : ''">프로젝트 관리</a>
-            <a th:href="@{/support/list}"
+            <a th:href="@{/support/support/list}"
                th:classappend="${activeMenu}=='support' ? ' active' : ''">기술지원</a>
         </nav>
 

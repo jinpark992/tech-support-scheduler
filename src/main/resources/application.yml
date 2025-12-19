@@ -1,6 +1,6 @@
 --- # Configuration Port
 server:
-  port: 8086
+  port: 8088
 
 --- # Configuration Thymeleaf
 spring:
@@ -15,7 +15,7 @@ spring:
     livereload:
       enabled: true
     restart:
-      enabled: true
+      enabled: false
 
 #--- # Configuration MariaDb
 #spring:

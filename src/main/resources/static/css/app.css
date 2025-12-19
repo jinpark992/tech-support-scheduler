@@ -401,3 +401,194 @@ a { color: inherit; }
     .detail-meta{ grid-template-columns: 1fr; }
     .detail-actions{ flex-wrap: wrap; }
 }
+
+/* ===== Common Cards / Forms / Auth / Calendar (추가) ===== */
+
+.page-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin: 10px 0 16px;
+}
+.page-title{ margin:0; font-size:34px; font-weight:800; letter-spacing:-0.5px; }
+.page-actions{ display:flex; gap:10px; }
+
+.card{
+    background:#fff;
+    border:1px solid #d9dee7;
+    border-radius:12px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.08);
+}
+
+.btn-secondary{
+    color:#0f2f5c;
+    background:#f4f7fb;
+    border:1px solid #d5deea;
+    box-shadow:none;
+}
+.btn-sm{ padding:10px 14px; border-radius:10px; font-weight:800; }
+
+.form-card{ padding:24px; }
+.form-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:16px 18px;
+}
+.field{ display:flex; flex-direction:column; gap:8px; }
+.col-2{ grid-column: 1 / span 2; }
+.label{ font-weight:800; font-size:16px; }
+.input, .select, .textarea{
+    width:100%;
+    border:1px solid #cfd7e6;
+    border-radius:12px;
+    padding:14px 14px;
+    font-size:16px;
+    outline:none;
+}
+.input:focus, .select:focus, .textarea:focus{
+    border-color:#2f66b4;
+    box-shadow:0 0 0 4px rgba(47,102,180,0.12);
+}
+.helper{ color:#7b8596; font-size:13px; }
+
+.form-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    margin-top:18px;
+}
+
+.pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:6px 12px;
+    border-radius:999px;
+    background:#eef3f9;
+    font-weight:800;
+    font-size:14px;
+    color:#0f2f5c;
+}
+
+.radio-row{ display:flex; gap:16px; flex-wrap:wrap; }
+.radio{ display:flex; align-items:center; gap:8px; font-weight:700; }
+
+.auth-wrap{ max-width:520px; margin: 0 auto; padding-top: 10px; }
+.auth-card{ padding:26px; }
+.auth-title{ margin:0 0 16px; font-size:30px; font-weight:900; }
+.auth-note{ margin-top:14px; font-size:13px; color:#7b8596; line-height:1.5; }
+
+.calendar-card{ padding:18px; }
+.cal-head{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:10px 6px 16px;
+}
+.cal-title{ font-weight:900; font-size:20px; min-width:120px; text-align:center; }
+.cal-grid{
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap:10px;
+    padding: 6px;
+}
+.cal-cell{
+    border:1px solid #d9dee7;
+    border-radius:12px;
+    background:#fff;
+    min-height:78px;
+    padding:10px;
+    text-decoration:none;
+    color:inherit;
+}
+.cal-head-cell{
+    background: linear-gradient(180deg, #f7f9fc 0%, #eef3f9 100%);
+    min-height:auto;
+    text-align:center;
+    font-weight:900;
+    padding:12px 10px;
+}
+.cal-empty{ background:transparent; border:0; }
+.cal-day:hover{ background:#f8fbff; }
+.cal-num{ font-weight:900; font-size:16px; }
+.is-today{ border-color:#2f66b4; box-shadow:0 0 0 4px rgba(47,102,180,0.10); }
+.cal-hint{ margin-top:10px; color:#7b8596; font-size:13px; }
+
+@media (max-width: 860px){
+    .form-grid{ grid-template-columns: 1fr; }
+    .col-2{ grid-column: auto; }
+}
+
+/* ===== Auth (Login/Join) ===== */
+.auth-card{
+    max-width: 520px;
+    margin: 30px auto 0;
+    background: #fff;
+    border: 1px solid #d9dee7;
+    border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+    padding: 28px;
+}
+
+.auth-title{
+    margin: 0 0 18px;
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.auth-error{
+    background: #ffecec;
+    border: 1px solid #ffb9b9;
+    color: #b00020;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin: 0 0 14px;
+    font-weight: 800;
+}
+
+.auth-form .form-row{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.auth-form label{
+    font-weight: 800;
+}
+
+.auth-form input,
+.auth-form select{
+    height: 46px;
+    border-radius: 10px;
+    border: 1px solid #d9dee7;
+    padding: 0 14px;
+    font-size: 16px;
+}
+
+.form-help{
+    color: #7b8596;
+    font-size: 13px;
+}
+
+.form-actions{
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-ghost{
+    background: #f3f6fb;
+    color: #1f4f92;
+}
+
+.auth-hint{
+    margin-top: 14px;
+    color: #7b8596;
+    font-size: 13px;
+}
+/* ===== Auth (Login/Join) ===== */
+
+

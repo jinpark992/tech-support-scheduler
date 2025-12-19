@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu='home'">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>로그인</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+
+<body>
+<div class="app-shell">
+
+    <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+    <main class="content">
+        <div class="auth-card">
+            <h1 class="auth-title">로그인</h1>
+
+            <p class="auth-error" th:if="${error}" th:text="${error}"></p>
+
+            <form method="post" th:action="@{/login}" class="auth-form">
+                <div class="form-row">
+                    <label>아이디</label>
+                    <input type="text" name="id" placeholder="예) admin" required>
+                </div>
+
+                <div class="form-row">
+                    <label>비밀번호</label>
+                    <input type="password" name="pw" placeholder="예) 1234" required>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit">로그인</button>
+                    <a class="btn btn-ghost" th:href="@{/join}">회원가입</a>
+                </div>
+
+                <p class="auth-hint">
+                    테스트 계정: admin / sales / support (비번 1234)
+                </p>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+</body>
+</html>

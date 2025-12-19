@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu='support'">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>기술지원 등록</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+    <main class="content">
+        <div class="page-head">
+            <h1 class="page-title">기술지원 등록</h1>
+            <div class="page-actions">
+                <a class="btn btn-secondary" th:href="@{/support/support/list}">캘린더로</a>
+            </div>
+        </div>
+
+        <div class="card form-card">
+            <form action="javascript:void(0)" method="post">
+                <div class="form-grid">
+                    <div class="field">
+                        <label class="label">지원 날짜</label>
+                        <input class="input" type="date" th:value="${param.date}" />
+                    </div>
+
+                    <div class="field">
+                        <label class="label">프로젝트</label>
+                        <select class="select">
+                            <option value="">프로젝트를 선택하세요</option>
+                            <option th:each="p : ${projects}" th:value="${p.id}" th:text="${p.name}">프로젝트명</option>
+                        </select>
+                        <div class="helper">※ 프로젝트는 “프로젝트 관리”에서 등록한 목록이 뜨는 구조로 갈 거야.</div>
+                    </div>
+
+                    <div class="field col-2">
+                        <label class="label">지원 유형</label>
+                        <div class="radio-row">
+                            <label class="radio"><input type="radio" name="type" checked> 유지보수</label>
+                            <label class="radio"><input type="radio" name="type"> 설치지원</label>
+                            <label class="radio"><input type="radio" name="type"> 장애지원</label>
+                        </div>
+                    </div>
+
+                    <div class="field col-2">
+                        <label class="label">제목</label>
+                        <input class="input" type="text" placeholder="예) OO사 인증서 오류 조치" />
+                    </div>
+
+                    <div class="field col-2">
+                        <label class="label">내용</label>
+                        <textarea class="textarea" rows="7" placeholder="무슨 일이 있었는지, 무엇을 했는지, 다음 액션"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit">등록(임시)</button>
+                    <a class="btn btn-secondary" th:href="@{/support/support}">취소</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu='support'">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>기술지원</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+    <main class="content">
+        <div class="page-head">
+            <h1 class="page-title">기술지원</h1>
+            <div class="page-actions">
+                <a class="btn btn-primary" th:href="@{/support/support/new}">기술지원 등록</a>
+            </div>
+        </div>
+
+        <div class="card calendar-card">
+            <div class="cal-head">
+                <button class="btn btn-secondary btn-sm" type="button" id="prevBtn">이전</button>
+                <div class="cal-title" id="calTitle">2025-12</div>
+                <button class="btn btn-secondary btn-sm" type="button" id="nextBtn">다음</button>
+            </div>
+
+            <div class="cal-grid" id="calGrid">
+                <!-- JS로 채움 -->
+            </div>
+
+            <div class="cal-hint">
+                날짜를 누르면 등록 폼으로 이동함 (예: /support/support/new?date=2025-12-19)
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+
+<script>
+    (function(){
+        const grid = document.getElementById('calGrid');
+        const title = document.getElementById('calTitle');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        let cur = new Date();
+
+        function ymd(d){
+            const y = d.getFullYear();
+            const m = String(d.getMonth()+1).padStart(2,'0');
+            const dd = String(d.getDate()).padStart(2,'0');
+            return `${y}-${m}-${dd}`;
+        }
+
+        function render(){
+            grid.innerHTML = '';
+            const y = cur.getFullYear();
+            const m = cur.getMonth();
+            title.textContent = `${y}-${String(m+1).padStart(2,'0')}`;
+
+            const first = new Date(y, m, 1);
+            const last = new Date(y, m+1, 0);
+            const startDay = first.getDay(); // 0(일)~6(토)
+
+            const weekNames = ['일','월','화','수','목','금','토'];
+            weekNames.forEach(w=>{
+                const h = document.createElement('div');
+                h.className = 'cal-cell cal-head-cell';
+                h.textContent = w;
+                grid.appendChild(h);
+            });
+
+            // 빈칸
+            for(let i=0;i<startDay;i++){
+                const empty = document.createElement('div');
+                empty.className = 'cal-cell cal-empty';
+                grid.appendChild(empty);
+            }
+
+            const today = new Date();
+            for(let day=1; day<=last.getDate(); day++){
+                const d = new Date(y, m, day);
+                const a = document.createElement('a');
+                a.className = 'cal-cell cal-day';
+                a.href = `/support/support/new?date=${ymd(d)}`;
+                a.innerHTML = `<div class="cal-num">${day}</div><div class="cal-badges"></div>`;
+
+                if(d.toDateString() === today.toDateString()){
+                    a.classList.add('is-today');
+                }
+                grid.appendChild(a);
+            }
+        }
+
+        prevBtn.addEventListener('click', ()=>{ cur = new Date(cur.getFullYear(), cur.getMonth()-1, 1); render(); });
+        nextBtn.addEventListener('click', ()=>{ cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); render(); });
+
+        render();
+    })();
+</script>
+</body>
+</html>

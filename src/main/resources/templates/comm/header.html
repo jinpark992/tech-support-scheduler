@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="site-header" th:fragment="header(activeMenu)">
+    <div class="header-inner">
+        <div class="brand">
+            <a th:href="@{/support/home}">기술지원 스케줄 관리</a>
+        </div>
+
+        <nav class="gnb">
+            <a th:href="@{/support/home}"
+               th:classappend="${activeMenu}=='home' ? ' active' : ''">대시보드</a>
+            <a th:href="@{/project/list}"
+               th:classappend="${activeMenu}=='project' ? ' active' : ''">프로젝트 관리</a>
+            <a th:href="@{/support/list}"
+               th:classappend="${activeMenu}=='support' ? ' active' : ''">기술지원</a>
+        </nav>
+
+        <div class="auth">
+            <a th:href="@{/login}">로그인</a>
+            <a th:href="@{/join}">회원가입</a>
+        </div>
+    </div>
+</header>
+</body>
+</html>

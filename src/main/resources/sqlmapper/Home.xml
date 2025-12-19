@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.sailing.v3.dao.MemberDao">
+    <!-- 메뉴 조회 -->
+    <select id="doList" resultType="com.boot.sailing.v3.vo.Cust_info">
+        SELECT no, cust_id, name, email, role,
+               DATE_FORMAT(reg_day,'%Y.%m.%d') AS reg_day
+        FROM cust_info
+    </select>
+
+    <!--
+        <![CDATA[   ]]>   : xml 파싱에 관여하지 않도록 처리
+        <  	&lt;
+        >	&gt;
+    -->
+    <!-- 검색에 의한 쿼리 -->
+    <select id="doSerch" resultType="com.boot.sailing.v3.vo.Cust_info">
+        SELECT no, cust_id, name, email, role,
+        DATE_FORMAT(reg_day,'%Y.%m.%d') AS reg_day
+        FROM cust_info
+        WHERE 1=1
+        AND reg_day >= DATE_FORMAT( #{strStartDate},'%Y%m%d')
+        AND reg_day &lt; DATE_ADD(DATE_FORMAT(#{strEndDate},'%Y%m%d'), INTERVAL +1 DAY)
+        <if test="strName != 'ALL'">
+            AND name like CONCAT(#{strName},'%')
+        </if>
+    </select>
+
+</mapper>

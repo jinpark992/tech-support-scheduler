@@ -18,25 +18,31 @@
                 <a class="btn btn-ghost" th:href="@{/support/notice}">목록으로</a>
             </div>
 
-            <!-- 아직 저장은 안 함: 화면만 -->
-            <form class="form" action="#" method="post">
-                <div class="field">
-                    <label>제목</label>
-                    <input type="text" placeholder="제목을 입력하세요" />
-                </div>
+            <!-- ✅ Notice 객체로 바인딩 -->
+                <form class="form" th:action="@{/support/notice/new}" method="post"
+                      th:object="${notice}">
+
+                    <div class="field">
+                        <label>상단 고정</label>
+                        <!-- DB가 INT면 0/1 추천 -->
+                        <select th:field="*{isTop}">
+                            <option value="0" selected>일반</option>
+                            <option value="1">상단</option>
+                        </select>
+                    </div>
 
                 <div class="field">
-                    <label>작성일</label>
-                    <input type="date" />
+                    <label>제목</label>
+                    <input type="text" th:field="*{title}" placeholder="제목을 입력하세요" required />
                 </div>
 
                 <div class="field">
                     <label>내용</label>
-                    <textarea rows="10" placeholder="내용을 입력하세요"></textarea>
+                    <textarea th:field="*{content}" rows="10" placeholder="내용을 입력하세요" required></textarea>
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-primary">등록(임시)</button>
+                    <button type="submit" class="btn btn-primary">등록</button>
                     <a class="btn btn-ghost" th:href="@{/support/notice}">취소</a>
                 </div>
             </form>

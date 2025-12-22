@@ -35,32 +35,40 @@
                             <th>제목</th>
                             <th style="width:160px;">작성일</th>
                             <th style="width:120px;">조회수</th>
+                            <th style="width:120px;">관리</th>  <!-- ✅ 추가 -->
                         </tr>
                         </thead>
 
                         <tbody>
-                            <tr th:if="${#lists.isEmpty(notices)}">
-                            <td class="empty" colspan="4">등록된 공지사항이 없습니다.</td>
+                        <tr th:if="${#lists.isEmpty(notices)}">
+                            <td class="empty" colspan="5">등록된 공지사항이 없습니다.</td> <!-- ✅ 4 -> 5 -->
                         </tr>
 
                         <tr th:each="n : ${notices}">
-                            <td class="t-center" th:text="${n.id}">1</td>
+                            <td class="t-center" th:text="${n.noticeId}">1</td>
 
                             <td class="title-cell">
-                                <span th:if="${n.top}" class="badge badge-top">상단</span>
+                                <span th:if="${n.isTop == 1}" class="badge badge-top">상단</span>
 
-                                <!-- ✅ RequestParam 방식 링크 -->
                                 <a class="title-link"
-                                   th:href="@{/support/notice/detail(id=${n.id})}"
-                                   th:text="${n.title}">
-                                    제목
-                                </a>
+                                   th:href="@{/support/notice/detail(id=${n.noticeId})}"
+                                   th:text="${n.title}">제목</a>
                             </td>
 
-                            <td class="t-center" th:text="${n.writeDate}">2024-05-02</td>
+                            <td class="t-center" th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd')}">2024-05-02</td>
                             <td class="t-center" th:text="${n.views}">5</td>
+
+                                <!-- ✅ 삭제 버튼 -->
+                                <td class="t-center">
+                                    <form th:action="@{/support/notice/delete}" method="GET"
+                                          onsubmit="return confirm('정말 삭제할까요?');">
+                                        <input type="hidden" name="noticeId" th:value="${n.noticeId}">
+                                        <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                                    </form>
+                                </td>
                         </tr>
                         </tbody>
+
 
                     </table>
                 </div>

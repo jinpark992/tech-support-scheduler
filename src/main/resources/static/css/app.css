@@ -589,6 +589,8 @@ a { color: inherit; }
     color: #7b8596;
     font-size: 13px;
 }
-/* ===== Auth (Login/Join) ===== */
+.btn-danger { background:#d9534f; color:#fff; }
+.btn-danger:hover { filter: brightness(0.95); }
+.btn-sm { padding: 8px 14px; font-size: 14px; border-radius: 10px; }
 
 

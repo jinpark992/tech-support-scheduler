@@ -1,83 +1,97 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu='home'">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>공지사항 상세</title>
-
+    <title>공지 상세</title>
     <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 
 <body>
 <div class="app-shell">
 
-    <!-- HEADER -->
     <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
 
-    <!-- CONTENT -->
     <main class="content">
+        <section class="detail-card">
 
-        <div class="detail-head">
-            <h1 class="board-title">공지사항 상세</h1>
+            <!-- 제목 + 상단배지 + 관리버튼 -->
+            <div class="detail-head">
+                <div class="detail-title">
+                    <span th:if="${notice.isTop == 1 or notice.isTop == '1'}"
+                          class="badge badge-top">상단</span>
 
-            <div class="detail-actions">
-                <a class="btn btn-light" th:href="@{/support/notice}">목록으로</a>
-                <a class="btn btn-primary" th:href="@{/support/notice/new}">공지 등록</a>
-                <!-- <a class="btn" th:href="@{/support/notice/edit(id=${notice.id})}">수정</a> -->
-                <!-- <button class="btn btn-danger">삭제</button> -->
+                    <h2 th:text="${notice.title}">제목</h2>
+                </div>
 
+                <div class="detail-actions">
+                    <a class="btn btn-ghost" th:href="@{/support/notice}">목록</a>
+
+                    <a class="btn btn-primary"
+                       th:href="@{/support/notice/edit(noticeId=${notice.noticeId})}">
+                        수정
+                    </a>
+
+                    <form th:action="@{/support/notice/delete}" method="post"
+                          onsubmit="return confirm('정말 삭제할까요?');" style="display:inline;">
+                        <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+                        <button type="submit" class="btn btn-danger">삭제</button>
+                    </form>
+                </div>
             </div>
-        </div>
 
-
-        <!-- 정상 데이터 -->
-        <section class="detail-card" th:if="${notice != null}">
-            <div class="detail-title">
-                <span th:if="${notice.top}" class="badge badge-top">상단</span>
-                <h2 th:text="${notice.title}">제목</h2>
-            </div>
-
+            <!-- 메타 -->
             <div class="detail-meta">
                 <div class="meta-item">
-                    <span class="meta-label">번호</span>
-                    <span class="meta-value" th:text="${notice.id}">1</span>
+                    <span class="meta-label">작성자</span>
+                    <span class="meta-value"
+                          th:text="${notice.writer != null ? notice.writer : 'admin'}">admin</span>
                 </div>
 
                 <div class="meta-item">
                     <span class="meta-label">작성일</span>
-                    <span class="meta-value" th:text="${notice.writeDate}">2024-05-02</span>
+                    <span class="meta-value"
+                          th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}">2025-12-23</span>
                 </div>
 
                 <div class="meta-item">
                     <span class="meta-label">조회수</span>
-                    <span class="meta-value" th:text="${notice.views}">5</span>
+                    <span class="meta-value" th:text="${notice.views}">0</span>
+                </div>
+
+                <div class="meta-item" th:if="${notice.updatedAt != null}">
+                    <span class="meta-label">수정일</span>
+                    <span class="meta-value"
+                          th:text="${#temporals.format(notice.updatedAt, 'yyyy-MM-dd HH:mm')}">-</span>
                 </div>
             </div>
 
             <div class="detail-body">
-                <p class="detail-content" th:text="${notice.content}">
-                    내용
-                </p>
+                <p class="detail-content" th:text="${notice.content}">내용</p>
             </div>
 
-            <div class="detail-footer">
-                <a class="btn btn-light" th:href="@{/support/notice}">목록으로</a>
+            <!-- 이전글/다음글 -->
+            <div class="detail-nav" style="margin-top:22px; display:grid; gap:8px;">
+                <div>
+                    이전글 :
+                    <span th:if="${prevNotice == null}">없음</span>
+                    <a th:if="${prevNotice != null}"
+                       th:href="@{/support/notice/detail(noticeId=${prevNotice.noticeId})}"
+                       th:text="${prevNotice.title}">이전글</a>
+                </div>
+                <div>
+                    다음글 :
+                    <span th:if="${nextNotice == null}">없음</span>
+                    <a th:if="${nextNotice != null}"
+                       th:href="@{/support/notice/detail(noticeId=${nextNotice.noticeId})}"
+                       th:text="${nextNotice.title}">다음글</a>
+                </div>
             </div>
+
         </section>
-
-        <!-- notice가 null일 때 -->
-        <section class="detail-card" th:if="${notice == null}">
-            <div class="empty">해당 공지사항이 없습니다.</div>
-            <div class="detail-footer">
-                <a class="btn btn-light" th:href="@{/support/notice}">목록으로</a>
-            </div>
-        </section>
-
     </main>
 
-    <!-- FOOTER -->
     <div th:replace="~{comm/footer :: footer}"></div>
-
 </div>
 </body>
 </html>

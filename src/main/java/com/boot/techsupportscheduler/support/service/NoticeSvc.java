@@ -27,14 +27,30 @@ public class NoticeSvc {
         return list;
     }
 
-    public int doDelete(String strNo) {
+    public int doDelete(Long noticeId) {
 
-        int i = noticeDao.doDelete(strNo);
+        int i = noticeDao.doDelete(noticeId);
         return i;
     }
 
     public int doInsert(Notice notice) {
         int i = noticeDao.doInsert(notice);
         return i;
+    }
+
+
+    public Notice doDetail(Long noticeId) {
+        noticeDao.increaseViews(noticeId); // ✅ 상세 들어가면 조회수 +1
+        return noticeDao.doDetail(noticeId);
+    }
+
+    public Notice doPrev(Long noticeId) {
+        Notice prev = noticeDao.doPrev(noticeId);     // 이전글
+        return prev;
+    }
+
+    public Notice doNext(Long noticeId) {
+        Notice next = noticeDao.doNext(noticeId);     // 다음글
+        return next;
     }
 }

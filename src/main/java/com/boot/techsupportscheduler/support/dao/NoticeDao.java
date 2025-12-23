@@ -9,7 +9,15 @@ import java.util.List;
 public interface NoticeDao {
     List<Notice> doList();
 
-    int doDelete(String strNo);
+    int doDelete(Long noticeId);
 
     int doInsert(Notice notice);
+
+    Notice doDetail(Long noticeId);
+
+    void increaseViews(Long noticeId);
+
+    Notice doPrev(Long noticeId);
+
+    Notice doNext(Long noticeId);
 }

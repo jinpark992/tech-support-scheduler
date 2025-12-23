@@ -16,4 +16,6 @@ public class Notice {
     private String deleteYn;        // 삭제여부(소프트 삭제) (DB: delete_yn)  "Y" / "N"
     // ※ 실제 delete 안 하고 Y로만 바꾸는 방식
     private LocalDateTime deletedAt; // 삭제일시 (DB: deleted_at)  deleteYn="Y"일 때만 값 있음
+    private String writer; // 작성자(로그인 아이디)
+
 }

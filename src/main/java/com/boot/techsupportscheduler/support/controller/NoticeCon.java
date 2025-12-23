@@ -37,10 +37,10 @@ public class NoticeCon {
         return "home/home";                       // templates/home/home.html
     }
 
-    @GetMapping("/notice/delete")
-    public String doDelete(@RequestParam("noticeId") String strNo){
-        log.info("noticeId : " + strNo);
-        noticeSvc.doDelete(strNo);
+    @PostMapping("/notice/delete")
+    public String doDelete(@RequestParam("noticeId") Long noticeId){
+        log.info("noticeId : " + noticeId);
+        noticeSvc.doDelete(noticeId);
         return "redirect:/support/notice";
     }
 
@@ -68,20 +68,32 @@ public class NoticeCon {
         noticeSvc.doInsert(notice);
         return "redirect:/support/notice";
     }
-    /*
     // 3) 상세 화면 (RequestParam 방식)
-    // URL: http://localhost:8086/support/notice/detail?id=1
     @GetMapping("/notice/detail")
-    public String detail(@RequestParam int id, Model model) {
+    public String detail(@RequestParam("noticeId") Long noticeId, Model model) {
+
+        Notice notice = noticeSvc.doDetail(noticeId); // 현재글
+        Notice prev = noticeSvc.doPrev(noticeId);     // 이전글
+        Notice next = noticeSvc.doNext(noticeId);     // 다음글
+
         model.addAttribute("activeMenu", "home");
+        model.addAttribute("notice", notice);
+        model.addAttribute("prevNotice", prev);
+        model.addAttribute("nextNotice", next);
 
-        Notice notice = dummy.stream()
-                .filter(n -> n.id() == id)
-                .findFirst()
-                .orElse(null);
+        return "notice/detail";
+    }
 
-        model.addAttribute("notice", notice); // detail.html에서 사용
-        return "notice/detail"; // templates/notice/detail.html
-    }*/
+    @GetMapping("/notice/edit")
+    public String getEdit(Model model) {
+        model.addAttribute("activeMenu", "home");
+        model.addAttribute("notice", new Notice()); // ✅ th:object="${notice}" 때문에 필수
+        return "notice/form";
+    }
+
 
 }
+
+
+
+

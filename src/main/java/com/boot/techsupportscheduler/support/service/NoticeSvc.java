@@ -53,4 +53,8 @@ public class NoticeSvc {
         Notice next = noticeDao.doNext(noticeId);     // 다음글
         return next;
     }
+
+    public int doUpdate(Notice notice){
+        return noticeDao.doUpdate(notice);
+    }
 }

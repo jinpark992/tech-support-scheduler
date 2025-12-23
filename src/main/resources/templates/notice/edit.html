@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu=${activeMenu}">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>공지 수정</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+
+<body>
+<div class="app-shell">
+    <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+    <main class="content">
+        <section class="form-card">
+            <div class="form-head">
+                <h1 class="form-title">공지 수정</h1>
+                <a class="btn btn-ghost" th:href="@{/support/notice}">목록으로</a>
+            </div>
+
+            <form class="form" th:action="@{/support/notice/edit}" method="post" th:object="${notice}">
+                <!-- ✅ 어떤 글 수정인지 꼭 보내라 -->
+                <input type="hidden" th:field="*{noticeId}"/>
+
+                <div class="field">
+                    <label>상단 고정</label>
+                    <select th:field="*{isTop}">
+                        <option value="0">일반</option>
+                        <option value="1">상단</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>제목</label>
+                    <input type="text" th:field="*{title}" placeholder="제목을 입력하세요" required/>
+                </div>
+
+                <div class="field">
+                    <label>내용</label>
+                    <textarea th:field="*{content}" rows="10" placeholder="내용을 입력하세요" required></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">수정 저장</button>
+                    <a class="btn btn-ghost" th:href="@{/support/notice/detail(noticeId=${notice.noticeId})}">취소</a>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+</body>
+</html>

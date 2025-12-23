@@ -20,4 +20,6 @@ public interface NoticeDao {
     Notice doPrev(Long noticeId);
 
     Notice doNext(Long noticeId);
+
+    int doUpdate(Notice notice);
 }

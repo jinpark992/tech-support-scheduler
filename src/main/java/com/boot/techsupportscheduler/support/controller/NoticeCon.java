@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/support")
@@ -85,11 +86,24 @@ public class NoticeCon {
     }
 
     @GetMapping("/notice/edit")
-    public String getEdit(Model model) {
+    public String getEdit(@RequestParam("noticeId") Long noticeId, Model model) {
+
+        Notice notice = noticeSvc.doDetail(noticeId); // 1건 조회
+
         model.addAttribute("activeMenu", "home");
-        model.addAttribute("notice", new Notice()); // ✅ th:object="${notice}" 때문에 필수
-        return "notice/form";
+        model.addAttribute("notice", notice);
+
+        return "notice/edit";
     }
+
+    @PostMapping("/notice/edit")
+    public String postEdit(@ModelAttribute("notice") Notice notice) {
+
+        noticeSvc.doUpdate(notice);
+
+        return "redirect:/support/notice/detail?noticeId=" + notice.getNoticeId();
+    }
+
 
 
 }

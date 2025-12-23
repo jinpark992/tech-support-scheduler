@@ -82,4 +82,15 @@
         WHERE notice_id = #{noticeId}
     </update>
 
+    <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Notice">
+        UPDATE notice
+        SET
+        is_top = #{isTop},
+        title = #{title},
+        content = #{content},
+        updated_at = NOW()
+        WHERE notice_id = #{noticeId}
+        AND deleted_yn = 'N'
+    </update>
+
 </mapper>

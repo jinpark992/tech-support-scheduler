@@ -5,14 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>프로젝트 관리</title>
     <link rel="stylesheet" th:href="@{/css/app.css}"/>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.dataset.code;
+            if (!code) return alert("복사할 코드가 없습니다.");
+            navigator.clipboard.writeText(code)
+                .then(() => alert("프로젝트 코드 복사됨: " + code))
+                .catch(() => alert("복사 실패 (브라우저 권한 확인)"));
+        }
+    </script>
+
+    <style>
+        .tbl.tbl-project {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        .col-no {
+            width: 70px;
+        }
+
+        .col-code {
+            width: 220px;
+        }
+
+        .col-status {
+            width: 120px;
+        }
+
+        .col-dday {
+            width: 110px;
+        }
+
+        .col-reg {
+            width: 140px;
+        }
+
+        .col-actions {
+            width: 90px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .code-cell {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .code-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            background: #eef3ff;
+            color: #1d3a8a;
+            white-space: nowrap;
+        }
+
+        /* 핵심: 프로젝트 칸에 정보 묶어서 폭 절약 */
+        .proj-cell {
+            text-align: left;
+        }
+
+        .proj-title {
+            display: block;
+            font-weight: 900;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .proj-meta {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #6b7280;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .dday-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            background: #eef2ff;
+            color: #1d3a8a;
+            white-space: nowrap;
+        }
+
+        .dday-badge.over {
+            background: #ffecec;
+            color: #b42318;
+        }
+
+        /* 마감 지남 */
+    </style>
 </head>
+
 <body>
 <div class="app-shell">
     <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
 
     <main class="content">
         <div class="page-head">
-            <h1 class="page-title">프로젝트 관리</h1>
+            <div>
+                <h1 class="page-title">프로젝트 관리</h1>
+                <div class="hint">프로젝트 코드는 기술지원 등록 시 프로젝트 선택/검색용으로 사용됩니다.</div>
+            </div>
             <div class="page-actions">
                 <a class="btn btn-primary" th:href="@{/support/project/new}">프로젝트 등록</a>
             </div>
@@ -20,37 +132,90 @@
 
         <div class="card">
             <div class="table-wrap">
-                <table class="tbl">
+                <table class="tbl tbl-project">
                     <thead>
                     <tr>
-                        <th style="width:90px;">번호</th>
-                        <th>프로젝트명</th>
-                        <th style="width:220px;">고객사</th>
-                        <th style="width:160px;">수주금액</th>
-                        <th style="width:140px;">상태</th>
-                        <th style="width:160px;">등록일</th>
+                        <th class="col-no">번호</th>
+                        <th class="col-code">프로젝트 코드</th>
+                        <th>프로젝트</th>
+                        <th class="col-status">상태</th>
+                        <th class="col-dday">마감</th>
+                        <th class="col-reg">등록일</th>
                     </tr>
                     </thead>
+
                     <tbody>
                     <tr th:if="${#lists.isEmpty(projects)}">
-                        <td class="empty" colspan="6">등록된 프로젝트가 없습니다.</td>
+                        <td class="empty" colspan="7">등록된 프로젝트가 없습니다.</td>
                     </tr>
 
-                    <tr th:each="p : ${projects}">
-                        <td class="t-center" th:text="${p.id}">1</td>
-                        <td class="title-cell">
-                            <a class="title-link" th:href="@{/support/project/{id}(id=${p.id})}" th:text="${p.name}">프로젝트명</a>
+                    <tr th:each="p, stat : ${projects}">
+                        <td class="t-center" th:text="${stat.count}">1</td>
+
+                        <td class="t-center">
+                            <div class="code-cell">
+                                <span class="code-pill" th:text="${p.projectCode}">TS-XXXX</span>
+                                <button type="button" class="btn btn-ghost btn-sm"
+                                        th:attr="data-code=${p.projectCode}"
+                                        onclick="copyCode(this)">복사
+                                </button>
+                            </div>
                         </td>
-                        <td class="t-center" th:text="${p.client}">고객사</td>
-                        <td class="t-center" th:text="${p.amount}">1000000</td>
+
+                        <td class="proj-cell">
+                            <a class="proj-title"
+                               th:href="@{/support/project/detail(projectId=${p.projectId})}"
+                               th:text="${p.projectName}">프로젝트명</a>
+
+                            <div class="proj-meta">
+                                <span th:text="'고객사: ' + (p.clientName != null ? p.clientName : '-')">고객사: -</span>
+                                <span th:text="'영업: ' + (p.salesManager != null ? p.salesManager : '-')">영업: -</span>
+                                <!-- 금액 -->
+                                <span th:if="${p.contractAmount != null}"
+                                      th:text="|금액: ${#numbers.formatInteger(p.contractAmount, 0, 'COMMA')}|">
+                                  금액: 0
+                                </span>
+                                <span th:unless="${p.contractAmount != null}"
+                                      th:text="'금액: -'">
+                                  금액: -ㅌ
+                                </span>
+                            </div>
+                        </td>
+
                         <td class="t-center">
                             <span class="pill" th:text="${p.status}">진행중</span>
                         </td>
+
+                        <!-- ✅ 기간 칼럼 제거, 마감만 D-day로 -->
+                        <td class="t-center">
+                            <span class="dday-badge"
+                                  th:if="${p.dday != null}"
+                                  th:classappend="${p.dday < 0} ? ' over' : ''"
+                                  th:text="${p.dday >= 0 ? ('D-' + p.dday) : ('D+' + (p.dday * -1))}">
+                                D-12
+                            </span>
+                            <span th:if="${p.dday == null}">-</span>
+                        </td>
+
                         <td class="t-center" th:text="${p.regDate}">2024-05-02</td>
+
+
                     </tr>
                     </tbody>
+
                 </table>
             </div>
+        </div>
+
+        <!-- 페이징은 서버 붙일 때 교체 (지금은 UI만) -->
+        <div class="pager">
+            <a class="page-btn" href="javascript:void(0)">«</a>
+            <a class="page-btn" href="javascript:void(0)">‹</a>
+            <a class="page-btn active" href="javascript:void(0)">1</a>
+            <a class="page-btn" href="javascript:void(0)">2</a>
+            <a class="page-btn" href="javascript:void(0)">3</a>
+            <a class="page-btn" href="javascript:void(0)">›</a>
+            <a class="page-btn" href="javascript:void(0)">»</a>
         </div>
     </main>
 

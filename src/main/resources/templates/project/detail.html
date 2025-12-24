@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu='project'">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>프로젝트 상세</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<div class="app-shell">
+  <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+  <main class="content">
+    <div class="page-head">
+      <h1 class="page-title" th:text="${project.projectName}">프로젝트명</h1>
+      <div class="page-actions">
+        <a class="btn btn-ghost" th:href="@{/support/project/list}">목록으로</a>
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px;">
+      <div style="display:grid;grid-template-columns:160px 1fr;row-gap:10px;column-gap:14px;">
+        <div style="color:#6b7280;">프로젝트 코드</div>
+        <div th:text="${project.projectCode}">TS-XXXX</div>
+
+        <div style="color:#6b7280;">고객사</div>
+        <div th:text="${project.clientName}">-</div>
+
+        <div style="color:#6b7280;">영업담당</div>
+        <div th:text="${project.salesManager}">-</div>
+
+        <div style="color:#6b7280;">수주금액</div>
+        <div th:text="${#numbers.formatInteger(project.contractAmount,0,'COMMA')}">0</div>
+
+        <div style="color:#6b7280;">계약일</div>
+        <div th:text="${project.contractDate}">-</div>
+
+        <div style="color:#6b7280;">종료예정일</div>
+        <div th:text="${project.endDate}">-</div>
+
+        <div style="color:#6b7280;">상태</div>
+        <div><span class="pill" th:text="${project.status}">진행중</span></div>
+      </div>
+    </div>
+  </main>
+
+  <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+</body>
+</html>

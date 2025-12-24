@@ -607,4 +607,122 @@ a { color: inherit; }
 .btn-danger:hover { filter: brightness(0.95); }
 .btn-sm { padding: 8px 14px; font-size: 14px; border-radius: 10px; }
 
+.page-desc { margin: 6px 0 0; color: #6b7280; font-size: 13px; }
+
+.card-pad { padding: 16px; }
+
+.search-row { display:flex; gap:10px; align-items:center; }
+.input, .textarea, select.input {
+    width:100%;
+    padding: 12px 12px;
+    border:1px solid #d1d5db;
+    border-radius: 10px;
+    outline: none;
+}
+.textarea { resize: vertical; }
+
+.code-badge{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius: 10px;
+    background:#eef2ff;
+    color:#1e3a8a;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.2px;
+}
+
+.btn-mini{ padding:6px 10px; border-radius:10px; font-size:12px; }
+.help-text{ margin-left:10px; color:#6b7280; font-size:12px; }
+
+.suggest{
+    margin-top:10px;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    background:#fff;
+    box-shadow: 0 12px 30px rgba(0,0,0,.08);
+    max-height: 280px;
+    overflow:auto;
+}
+.suggest-list{ list-style:none; padding:8px; margin:0; }
+.suggest-item{
+    padding:10px 12px;
+    border-radius:10px;
+    cursor:pointer;
+}
+.suggest-item:hover{ background:#f3f4f6; }
+
+.pick-card{
+    margin-top:12px;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+    background:#f9fafb;
+}
+.pick-row{ display:flex; gap:10px; align-items:center; }
+.pick-label{ color:#6b7280; font-size:12px; margin-right:8px; }
+.pick-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px; }
+.pick-actions{ margin-top:10px; }
+
+.inline-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+/* ✅ 프로젝트 목록 테이블: 칼럼 압축 방지 + 가로 스크롤 */
+.table-wrap{
+    overflow-x: auto;          /* 화면이 좁으면 스크롤 */
+}
+
+/* 테이블이 찌그러지지 않게 최소 폭 */
+.tbl.tbl-project{
+    min-width: 1200px;
+    table-layout: auto;        /* fixed면 칼럼 더 찌그러짐 */
+}
+
+.tbl.tbl-project th,
+.tbl.tbl-project td{
+    white-space: nowrap;       /* 기본은 줄바꿈 막기 */
+    vertical-align: middle;
+}
+
+/* 프로젝트명은 한글이 세로로 찢어지지 않게 */
+.tbl.tbl-project .col-name{
+    white-space: normal;       /* 프로젝트명만 줄바꿈 허용 */
+    word-break: keep-all;      /* 한글 글자 단위로 안 찢어짐 */
+    min-width: 240px;
+}
+
+/* 코드 칼럼은 넓게 */
+.tbl.tbl-project .col-code{
+    min-width: 220px;
+}
+
+/* 코드 + 복사 버튼 정렬 */
+.tbl.tbl-project .code-cell{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* 프로젝트명 너무 길면 말줄임(한 줄로) */
+.tbl.tbl-project .title-link{
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 코드 뱃지(너 HTML은 code-pill인데, 스타일은 code-badge로 맞춰주자) */
+.code-pill, .code-badge{
+    display:inline-flex;
+    align-items:center;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.3px;
+    background:#eef3ff;
+    color:#1d3a8a;
+}
+
 

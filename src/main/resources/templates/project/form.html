@@ -11,62 +11,85 @@
     <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
 
     <main class="content">
-        <div class="page-head">
-            <h1 class="page-title">프로젝트 등록</h1>
-            <div class="page-actions">
-                <a class="btn btn-secondary" th:href="@{/support/project}">목록으로</a>
+        <section class="form-card">
+            <div class="form-head">
+                <h1 class="form-title">프로젝트 등록</h1>
+                <a class="btn btn-ghost" th:href="@{/support/project/list}">목록으로</a>
             </div>
-        </div>
 
-        <div class="card form-card">
-            <form action="javascript:void(0)" method="post">
+            <!-- ✅ Project 객체 바인딩 -->
+            <form class="form"
+                  th:action="@{/support/project/new}"
+                  method="post"
+                  th:object="${project}">
+
                 <div class="form-grid">
                     <div class="field">
                         <label class="label">프로젝트명</label>
-                        <input class="input" type="text" placeholder="예) 2025 OO사 유지보수" />
+                        <input class="input" type="text"
+                               th:field="*{projectName}"
+                               placeholder="예) 2025 OO사 유지보수"
+                               required/>
                     </div>
 
                     <div class="field">
                         <label class="label">고객사</label>
-                        <input class="input" type="text" placeholder="예) OO주식회사" />
+                        <input class="input" type="text"
+                               th:field="*{clientName}"
+                               placeholder="예) OO주식회사"
+                               required/>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">영업담당</label>
+                        <input class="input" type="text"
+                               th:field="*{salesManager}"
+                               placeholder="예) 홍길동"/>
                     </div>
 
                     <div class="field">
                         <label class="label">수주금액</label>
-                        <input class="input" type="number" placeholder="숫자만 입력" />
+                        <input class="input" type="number"
+                               th:field="*{contractAmount}"
+                               placeholder="숫자만 입력"/>
                     </div>
 
                     <div class="field">
                         <label class="label">상태</label>
-                        <select class="select">
-                            <option>대기</option>
-                            <option selected>진행중</option>
-                            <option>완료</option>
+                        <select class="select" th:field="*{status}">
+                            <option value="대기">대기</option>
+                            <option value="진행중" selected>진행중</option>
+                            <option value="완료">완료</option>
                         </select>
                     </div>
 
                     <div class="field">
                         <label class="label">계약일</label>
-                        <input class="input" type="date" />
+                        <input class="input" type="date"
+                               th:field="*{contractDate}"/>
                     </div>
 
                     <div class="field">
                         <label class="label">종료예정일</label>
-                        <input class="input" type="date" />
+                        <input class="input" type="date"
+                               th:field="*{endDate}"/>
                     </div>
 
+                    <!-- ✅ memo(내용) -->
                     <div class="field col-2">
                         <label class="label">내용/메모</label>
-                        <textarea class="textarea" rows="6" placeholder="프로젝트 설명, 특이사항, 계약 범위 등"></textarea>
+                        <textarea class="textarea" rows="6"
+                                  th:field="*{memo}"
+                                  placeholder="프로젝트 설명, 특이사항, 계약 범위 등"></textarea>
                     </div>
                 </div>
 
                 <div class="form-actions">
-                    <button class="btn btn-primary" type="submit">등록(임시)</button>
-                    <a class="btn btn-secondary" th:href="@{/support/project}">취소</a>
+                    <button type="submit" class="btn btn-primary">등록</button>
+                    <a class="btn btn-ghost" th:href="@{/support/project/list}">취소</a>
                 </div>
             </form>
-        </div>
+        </section>
     </main>
 
     <div th:replace="~{comm/footer :: footer}"></div>

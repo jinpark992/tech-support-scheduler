@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.techsupportscheduler.support.dao.ProjectDao">
+
+    <!-- 목록 -->
+    <select id="doList" resultType="com.boot.techsupportscheduler.support.vo.Project">
+        SELECT
+        project_id,
+        project_code,
+        project_name,
+        client_name,
+        sales_manager,
+        contract_amount,
+        status,
+        reg_date,
+        end_date,
+        DATEDIFF(end_date, CURDATE()) AS dday,
+        created_at,
+        updated_at,
+        delete_yn,
+        deleted_at,
+        memo
+        FROM project
+        WHERE delete_yn = 'N'
+        ORDER BY project_id DESC
+    </select>
+
+
+<!--    &lt;!&ndash; 상세 1건 &ndash;&gt;-->
+    <select id="doDetail"
+            parameterType="long"
+            resultType="com.boot.techsupportscheduler.support.vo.Project">
+        SELECT
+        project_id   AS projectId,
+        project_code AS projectCode,
+        project_name AS projectName,
+        client_name  AS clientName,
+        sales_manager AS salesManager,
+        contract_amount AS contractAmount,
+        status,
+        contract_date AS contractDate,
+        end_date AS endDate,
+        memo
+        FROM project
+        WHERE project_id = #{projectId}
+        AND delete_yn = 'N'
+    </select>
+
+<!--    &lt;!&ndash; 다음글 (id, title만 채워짐) &ndash;&gt;-->
+<!--    <select id="doNext" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">-->
+<!--        SELECT-->
+<!--        notice_id AS noticeId,-->
+<!--        title     AS title-->
+<!--        FROM notice-->
+<!--        WHERE deleted_yn = 'N'-->
+<!--        AND notice_id &gt; #{noticeId}-->
+<!--        ORDER BY notice_id ASC-->
+<!--        LIMIT 1-->
+<!--    </select>-->
+
+
+    <!-- 프로젝트 등록 -->
+    <insert id="doInsert"
+            parameterType="com.boot.techsupportscheduler.support.vo.Project"
+            useGeneratedKeys="true"
+            keyProperty="projectId"
+            keyColumn="project_id">
+
+        INSERT INTO project
+        (project_code, project_name, client_name, sales_manager, contract_amount, status,
+        contract_date, end_date, reg_date, memo,
+        created_at, updated_at, delete_yn, deleted_at)
+        VALUES
+        (#{projectCode}, #{projectName}, #{clientName}, #{salesManager}, #{contractAmount}, #{status},
+        #{contractDate}, #{endDate}, NOW(), #{memo},
+        NOW(), NOW(), 'N', NULL)
+
+    </insert>
+
+
+
+
+    <!--    &lt;!&ndash; 조회수 증가 &ndash;&gt;-->
+<!--    <update id="increaseViews" parameterType="long">-->
+<!--        UPDATE notice-->
+<!--        SET views = views + 1-->
+<!--        WHERE notice_id = #{noticeId}-->
+<!--        AND deleted_yn = 'N'-->
+<!--    </update>-->
+
+<!--    &lt;!&ndash; 삭제(소프트 삭제 추천) &ndash;&gt;-->
+<!--    <update id="doDelete" parameterType="long">-->
+<!--        UPDATE notice-->
+<!--        SET deleted_yn = 'Y',-->
+<!--        deleted_at = NOW()-->
+<!--        WHERE notice_id = #{noticeId}-->
+<!--    </update>-->
+
+<!--    <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Notice">-->
+<!--        UPDATE notice-->
+<!--        SET-->
+<!--        is_top = #{isTop},-->
+<!--        title = #{title},-->
+<!--        content = #{content},-->
+<!--        updated_at = NOW()-->
+<!--        WHERE notice_id = #{noticeId}-->
+<!--        AND deleted_yn = 'N'-->
+<!--    </update>-->
+
+</mapper>

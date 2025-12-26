@@ -41,6 +41,15 @@
         <div style="color:#6b7280;">상태</div>
         <div><span class="pill" th:text="${project.status}">진행중</span></div>
       </div>
+
+      <!-- ✅ memo(내용) -->
+      <div style="margin-top:16px;">
+        <div style="color:#6b7280;margin-bottom:6px;">내용/메모</div>
+        <div class="card" style="padding:14px; background:#fff;">
+          <pre style="margin:0;white-space:pre-wrap;word-break:break-word;"
+               th:text="${project.memo}">-</pre>
+        </div>
+      </div>
     </div>
   </main>
 

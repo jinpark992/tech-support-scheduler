@@ -13,8 +13,18 @@
   <main class="content">
     <div class="page-head">
       <h1 class="page-title" th:text="${project.projectName}">프로젝트명</h1>
+
       <div class="page-actions">
         <a class="btn btn-ghost" th:href="@{/support/project/list}">목록으로</a>
+
+        <a class="btn btn-secondary"
+           th:href="@{/support/project/edit(projectId=${project.projectId})}">수정</a>
+
+        <form th:action="@{/support/project/delete}" method="post" style="display:inline;">
+          <input type="hidden" name="projectId" th:value="${project.projectId}"/>
+          <button type="submit" class="btn btn-danger"
+                  onclick="return confirm('정말 삭제할까?');">삭제</button>
+        </form>
       </div>
     </div>
 
@@ -30,7 +40,7 @@
         <div th:text="${project.salesManager}">-</div>
 
         <div style="color:#6b7280;">수주금액</div>
-        <div th:text="${#numbers.formatInteger(project.contractAmount,0,'COMMA')}">0</div>
+        <div th:text="${project.contractAmount != null ? #numbers.formatInteger(project.contractAmount,0,'COMMA') : '-'}">0</div>
 
         <div style="color:#6b7280;">계약일</div>
         <div th:text="${project.contractDate}">-</div>
@@ -47,7 +57,7 @@
         <div style="color:#6b7280;margin-bottom:6px;">내용/메모</div>
         <div class="card" style="padding:14px; background:#fff;">
           <pre style="margin:0;white-space:pre-wrap;word-break:break-word;"
-               th:text="${project.memo}">-</pre>
+               th:text="${project.memo != null ? project.memo : '-'}">-</pre>
         </div>
       </div>
     </div>

@@ -10,15 +10,13 @@ body {
 
 a { color: inherit; }
 
-/* ===== Layout ===== */
+/* ===== Layout (정리: 충돌 제거) ===== */
 .app-shell{
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    width: 100%;
 }
 
 .content{
-    max-width: 1280px;
+    max-width: 1600px;              /* ✅ 기존 1280 -> 확장 */
     margin: 0 auto;
     padding: 26px 28px 70px;
     width: 100%;
@@ -30,7 +28,7 @@ a { color: inherit; }
 }
 
 .header-inner{
-    max-width: 1280px;
+    max-width: 1600px;              /* ✅ 기존 1280 -> 확장 */
     margin: 0 auto;
     padding: 22px 28px;
     border-radius: 18px;
@@ -98,7 +96,7 @@ a { color: inherit; }
 }
 
 .footer-inner{
-    max-width: 1280px;
+    max-width: 1600px;              /* ✅ 기존 1280 -> 확장 */
     margin: 0 auto;
     text-align: center;
     color: #6c788a;
@@ -139,12 +137,15 @@ a { color: inherit; }
     box-shadow: 0 16px 28px rgba(0,0,0,0.14);
 }
 
+/* ✅ 테이블 래퍼: 좁은 화면에서만 스크롤 */
 .table-wrap{
     background: #fff;
     border: 1px solid #d9dee7;
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 18px 40px rgba(0,0,0,0.10);
+
+    overflow-x: auto;               /* ✅ 유지: 모바일/좁은 창 대비 */
 }
 
 .tbl{
@@ -212,7 +213,6 @@ a { color: inherit; }
     font-size: 12px;
     line-height: 1;
 }
-
 
 .empty{
     text-align: center !important;
@@ -603,6 +603,7 @@ a { color: inherit; }
     color: #7b8596;
     font-size: 13px;
 }
+
 .btn-danger { background:#d9534f; color:#fff; }
 .btn-danger:hover { filter: brightness(0.95); }
 .btn-sm { padding: 8px 14px; font-size: 14px; border-radius: 10px; }
@@ -666,93 +667,18 @@ a { color: inherit; }
 
 .inline-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 
-/* ✅ 프로젝트 목록 테이블: 칼럼 압축 방지 + 가로 스크롤 */
-.table-wrap{
-    overflow-x: auto;          /* 화면이 좁으면 스크롤 */
-}
-
-/* 테이블이 찌그러지지 않게 최소 폭 */
-.tbl.tbl-project{
-    min-width: 1200px;
-    table-layout: auto;        /* fixed면 칼럼 더 찌그러짐 */
-}
-
-.tbl.tbl-project th,
-.tbl.tbl-project td{
-    white-space: nowrap;       /* 기본은 줄바꿈 막기 */
-    vertical-align: middle;
-}
-
-/* 프로젝트명은 한글이 세로로 찢어지지 않게 */
-.tbl.tbl-project .col-name{
-    white-space: normal;       /* 프로젝트명만 줄바꿈 허용 */
-    word-break: keep-all;      /* 한글 글자 단위로 안 찢어짐 */
-    min-width: 240px;
-}
-
-/* 코드 칼럼은 넓게 */
-.tbl.tbl-project .col-code{
-    min-width: 220px;
-}
-
-/* 코드 + 복사 버튼 정렬 */
-.tbl.tbl-project .code-cell{
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: center;
-}
-
-/* 프로젝트명 너무 길면 말줄임(한 줄로) */
-.tbl.tbl-project .title-link{
-    display: inline-block;
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* 코드 뱃지(너 HTML은 code-pill인데, 스타일은 code-badge로 맞춰주자) */
-.code-pill, .code-badge{
-    display:inline-flex;
-    align-items:center;
-    padding:4px 10px;
-    border-radius:999px;
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:0.3px;
-    background:#eef3ff;
-    color:#1d3a8a;
-}
-
+/* ===== 프로젝트 목록 테이블: 컬럼 폭/가독성 ===== */
 .tbl.tbl-project {
     table-layout: fixed;
     width: 100%;
 }
 
-.col-no {
-    width: 70px;
-}
-
-.col-code {
-    width: 220px;
-}
-
-.col-status {
-    width: 120px;
-}
-
-.col-dday {
-    width: 110px;
-}
-
-.col-reg {
-    width: 140px;
-}
-
-.col-actions {
-    width: 90px;
-}
+.col-no { width: 70px; }
+.col-code { width: 220px; }
+.col-status { width: 120px; }
+.col-dday { width: 110px; }
+.col-reg { width: 140px; }
+.col-actions { width: 140px; }     /* ✅ 기존 90 -> 확장 */
 
 .hint {
     font-size: 12px;
@@ -779,11 +705,7 @@ a { color: inherit; }
     white-space: nowrap;
 }
 
-/* 핵심: 프로젝트 칸에 정보 묶어서 폭 절약 */
-.proj-cell {
-    text-align: left;
-}
-
+.proj-cell { text-align: left; }
 .proj-title {
     display: block;
     font-weight: 900;
@@ -819,5 +741,41 @@ a { color: inherit; }
     color: #b42318;
 }
 
+/* ===== Project table: 버튼 세로깨짐/줄바꿈/폼 블록 문제 해결 ===== */
 
+/* 버튼 글자 줄바꿈 금지 (복사/수정/삭제 세로로 나오는거 방지) */
+.tbl.tbl-project .btn,
+.tbl.tbl-project button {
+    white-space: nowrap;
+}
 
+/* 복사 버튼 최소 폭 확보 (복사 글자 두줄로 안깨지게) */
+.tbl.tbl-project .btn-sm{
+    min-width: 56px;
+    padding: 8px 12px;
+    line-height: 1;
+}
+
+/* 코드 영역은 한 줄 유지 */
+.tbl.tbl-project .code-cell{
+    flex-wrap: nowrap;
+}
+
+/* 관리 칸: 수정/삭제 가로로 붙이기 */
+.tbl.tbl-project .action-cell{
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+/* form 기본 block 제거 (줄바꿈 원인) */
+.tbl.tbl-project .action-cell form{
+    display: inline-block;
+    margin: 0;
+}
+
+/* 관리 칼럼 폭 조금 넓히기 */
+.col-actions { width: 140px; }   /* 필요하면 160px */
+.col-code    { width: 260px; }   /* 필요하면 280px */

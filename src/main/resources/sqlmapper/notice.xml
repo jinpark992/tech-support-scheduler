@@ -82,6 +82,9 @@
         WHERE notice_id = #{noticeId}
     </update>
 
+
+
+
     <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Notice">
         UPDATE notice
         SET

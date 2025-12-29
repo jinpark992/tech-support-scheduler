@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu='project'">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>프로젝트 수정</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+    <main class="content">
+        <div class="page-head">
+            <h1 class="page-title">프로젝트 수정</h1>
+
+            <div class="page-actions">
+                <a class="btn btn-ghost"
+                   th:href="@{/support/project/detail(projectId=${project.projectId})}">취소</a>
+            </div>
+        </div>
+
+        <div class="card" style="padding:18px;">
+            <!-- ✅ th:object 로 바인딩 -->
+            <!-- action 은 네 컨트롤러에 맞춰서 /support/project/update 또는 /support/project/edit 로 맞춰 -->
+            <form th:action="@{/support/project/edit}" method="post" th:object="${project}">
+                <input type="hidden" th:field="*{projectId}"/>
+
+                <div style="display:grid;grid-template-columns:160px 1fr;row-gap:12px;column-gap:14px;align-items:center;">
+
+                    <div style="color:#6b7280;">프로젝트명</div>
+                    <div>
+                        <input class="input" type="text" th:field="*{projectName}" placeholder="프로젝트명" required
+                               style="width:100%;"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}"></div>
+                    </div>
+
+                    <div style="color:#6b7280;">프로젝트 코드</div>
+                    <div>
+                        <input class="input" type="text" th:field="*{projectCode}" placeholder="TS-XXXX"
+                               style="width:100%;"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('projectCode')}" th:errors="*{projectCode}"></div>
+                    </div>
+
+                    <div style="color:#6b7280;">고객사</div>
+                    <div>
+                        <input class="input" type="text" th:field="*{clientName}" placeholder="고객사"
+                               style="width:100%;"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('clientName')}" th:errors="*{clientName}"></div>
+                    </div>
+
+                    <div style="color:#6b7280;">영업담당</div>
+                    <div>
+                        <input class="input" type="text" th:field="*{salesManager}" placeholder="영업담당"
+                               style="width:100%;"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('salesManager')}" th:errors="*{salesManager}"></div>
+                    </div>
+
+                    <div style="color:#6b7280;">수주금액</div>
+                    <div>
+                        <input class="input" type="number" th:field="*{contractAmount}" placeholder="예: 10000000"
+                               min="0" step="1" style="width:100%;"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('contractAmount')}" th:errors="*{contractAmount}"></div>
+                        <div style="color:#9ca3af;font-size:12px;margin-top:6px;">(숫자만 입력, 원 단위)</div>
+                    </div>
+
+                    <div style="color:#6b7280;">계약일</div>
+                    <div>
+                        <!-- LocalDate면 th:field 만으로도 보통 yyyy-MM-dd 들어감 -->
+                        <input class="input" type="date" th:field="*{contractDate}" style="width:220px;"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('contractDate')}" th:errors="*{contractDate}"></div>
+                    </div>
+
+                    <div style="color:#6b7280;">종료예정일</div>
+                    <div>
+                        <input class="input" type="date" th:field="*{endDate}" style="width:220px;"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></div>
+                    </div>
+
+                    <div style="color:#6b7280;">상태</div>
+                    <div>
+                        <select class="input" th:field="*{status}" style="width:220px;">
+                            <option value="">선택</option>
+                            <option value="대기">대기</option>
+                            <option value="진행중">진행중</option>
+                            <option value="완료">완료</option>
+                            <option value="중단">중단</option>
+                        </select>
+                        <div class="field-error" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+                    </div>
+                </div>
+
+                <!-- ✅ memo -->
+                <div style="margin-top:16px;">
+                    <div style="color:#6b7280;margin-bottom:6px;">내용/메모</div>
+                    <textarea class="input" th:field="*{memo}" rows="8"
+                              placeholder="메모를 입력하세요"
+                              style="width:100%;resize:vertical;"></textarea>
+                    <div class="field-error" th:if="${#fields.hasErrors('memo')}" th:errors="*{memo}"></div>
+                </div>
+
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
+                    <a class="btn btn-ghost"
+                       th:href="@{/support/project/detail(projectId=${project.projectId})}">취소</a>
+                    <button type="submit" class="btn btn-primary"
+                            onclick="return confirm('저장할까?');">저장</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+</body>
+</html>

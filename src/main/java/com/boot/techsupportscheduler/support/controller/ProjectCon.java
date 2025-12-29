@@ -5,6 +5,7 @@ import com.boot.techsupportscheduler.support.service.NoticeSvc;
 import com.boot.techsupportscheduler.support.service.ProjectSvc;
 import com.boot.techsupportscheduler.support.vo.Notice;
 import com.boot.techsupportscheduler.support.vo.Project;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @Controller
+@Log4j2
 @RequestMapping("/support/project")
 public class ProjectCon {
     @Autowired
@@ -98,4 +100,32 @@ public class ProjectCon {
         model.addAttribute("project", list);
         return "project/detail";
     }
+    @PostMapping("/delete")
+    public String doDelete(@RequestParam("projectId") Long projectId){
+        log.info("noticeId : " + projectId);
+        projectSvc.doDelete(projectId);
+        return "redirect:/support/project/list";
+    }
+
+    @GetMapping("/edit")
+    public String getEdit(@RequestParam("projectId") Long projectId, Model model) {
+
+        Project project = projectSvc.doDetail(projectId);
+
+        model.addAttribute("activeMenu", "project");
+        model.addAttribute("project", project);
+
+        return "project/edit"; // templates/support/project/project-edit.html
+    }
+
+    @PostMapping("/edit")
+    public String postUpdate(@ModelAttribute Project project) {
+
+        projectSvc.doUpdate(project);
+
+        return "redirect:/support/project/detail?projectId=" + project.getProjectId();
+    }
+
+
+
 }

@@ -13,4 +13,8 @@ public interface ProjectDao {
     int doInsert(Project project);
 
     Project doDetail(Long projectId);
+
+    void doDelete(Long projectId);
+
+    void doUpdate(Project project);
 }

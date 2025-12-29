@@ -34,4 +34,14 @@ public class ProjectSvc {
         Project list = projectDao.doDetail(projectId);
         return list;
     }
+
+    public void doDelete(Long projectId) {
+        projectDao.doDelete(projectId);
+        return;
+    }
+
+    public void doUpdate(Project project) {
+        projectDao.doUpdate(project);
+        return;
+    }
 }

@@ -20,11 +20,11 @@
         DATEDIFF(end_date, CURDATE()) AS dday,
         created_at,
         updated_at,
-        delete_yn,
+        deleted_yn,
         deleted_at,
         memo
         FROM project
-        WHERE delete_yn = 'N'
+        WHERE deleted_yn = 'N'
         ORDER BY project_id DESC
     </select>
 
@@ -46,7 +46,7 @@
         memo
         FROM project
         WHERE project_id = #{projectId}
-        AND delete_yn = 'N'
+        AND deleted_yn = 'N'
     </select>
 
 <!--    &lt;!&ndash; 다음글 (id, title만 채워짐) &ndash;&gt;-->
@@ -72,13 +72,37 @@
         INSERT INTO project
         (project_code, project_name, client_name, sales_manager, contract_amount, status,
         contract_date, end_date, reg_date, memo,
-        created_at, updated_at, delete_yn, deleted_at)
+        created_at, updated_at, deleted_yn, deleted_at)
         VALUES
         (#{projectCode}, #{projectName}, #{clientName}, #{salesManager}, #{contractAmount}, #{status},
         #{contractDate}, #{endDate}, NOW(), #{memo},
         NOW(), NOW(), 'N', NULL)
 
     </insert>
+
+    <!-- 삭제(소프트 삭제 추천) -->
+    <update id="doDelete" parameterType="long">
+        DELETE FROM project
+        WHERE project_id = #{projectId}
+    </update>
+
+    <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Project">
+        UPDATE project
+        SET
+        project_name    = #{projectName},
+        project_code    = #{projectCode},
+        client_name     = #{clientName},
+        sales_manager   = #{salesManager},
+        contract_amount = #{contractAmount},
+        contract_date   = #{contractDate},
+        end_date        = #{endDate},
+        status          = #{status},
+        memo            = #{memo},
+        updated_at      = NOW()
+        WHERE project_id = #{projectId}
+        AND deleted_yn = 'N'
+    </update>
+
 
 
 

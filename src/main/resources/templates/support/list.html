@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu='support'">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>기술지원</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+
+    <style>
+        .cal-head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+        .cal-head .cal-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .cal-head .cal-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .cal-month { height:32px; padding:4px 10px; border-radius:10px; border:1px solid rgba(0,0,0,.12); background:#fff; }
+        .cal-cell.is-sun .cal-num { color:#ef4444; }
+        .cal-cell.is-sat .cal-num { color:#2563eb; }
+        .cal-day.is-selected { outline:2px solid rgba(59,130,246,.35); border-radius:12px; }
+
+        /* ✅ 뱃지(프로젝트명+제목) 표시용 */
+        .cal-badges { margin-top:6px; display:flex; flex-direction:column; gap:4px; }
+        .cal-badge {
+            display:inline-block;
+            padding:3px 6px;
+            border-radius:8px;
+            border:1px solid rgba(0,0,0,.10);
+            background:#fff;
+            font-size:12px;
+            line-height:1.2;
+            text-decoration:none;
+        }
+        .cal-badge:hover { text-decoration:underline; }
+        .cal-badge-more { font-size:12px; opacity:.7; padding-left:2px; }
+        .cal-day.has-items { background: rgba(0,0,0,.02); border-radius:12px; cursor:pointer; }
+        .cal-day { cursor:pointer; }
+    </style>
+</head>
+
+<body>
+<div class="app-shell">
+    <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+    <main class="content">
+        <div class="page-head">
+            <h1 class="page-title">기술지원</h1>
+            <div class="page-actions">
+                <a class="btn btn-primary" th:href="@{/support/support/new}">기술지원 등록</a>
+            </div>
+        </div>
+
+        <div class="card calendar-card">
+            <div class="cal-head">
+                <div class="cal-left">
+                    <button class="btn btn-secondary btn-sm" type="button" id="prevBtn">이전</button>
+                    <div class="cal-title" id="calTitle">2025-12</div>
+                    <button class="btn btn-secondary btn-sm" type="button" id="nextBtn">다음</button>
+                </div>
+
+                <div class="cal-right">
+                    <button class="btn btn-ghost btn-sm" type="button" id="todayBtn">오늘</button>
+                    <input class="cal-month" type="month" id="monthPicker" aria-label="월 선택">
+                </div>
+            </div>
+
+            <div class="cal-grid" id="calGrid">
+                <!-- JS로 채움 -->
+            </div>
+
+            <div class="cal-hint">
+                날짜 클릭 → 등록 폼 이동 / (프로젝트명+제목) 클릭 → 상세 보기
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+
+<script th:inline="javascript">
+    const NEW_URL    = /*[[@{/support/support/new}]]*/    '/support/support/new';
+    const DETAIL_URL = /*[[@{/support/support/detail}]]*/ '/support/support/detail';
+
+    // 컨트롤러에서 model.addAttribute("supports", list)로 내려준 데이터
+    const SUPPORTS = /*[[${supports}]]*/ [];
+</script>
+
+<script>
+    (function(){
+        const grid = document.getElementById('calGrid');
+        const title = document.getElementById('calTitle');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const todayBtn = document.getElementById('todayBtn');
+        const monthPicker = document.getElementById('monthPicker');
+
+        let cur = new Date();
+        cur = new Date(cur.getFullYear(), cur.getMonth(), 1);
+        let selected = null;
+
+        function pad2(n){ return String(n).padStart(2,'0'); }
+        function ymd(d){
+            const y = d.getFullYear();
+            const m = pad2(d.getMonth()+1);
+            const dd = pad2(d.getDate());
+            return `${y}-${m}-${dd}`;
+        }
+        function ym(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}`; }
+
+        function readInitParams(){
+            const u = new URL(window.location.href);
+            const pYm = u.searchParams.get('ym');
+            const pDate = u.searchParams.get('date');
+
+            if(pYm && /^\d{4}-\d{2}$/.test(pYm)){
+                const [yy, mm] = pYm.split('-').map(Number);
+                cur = new Date(yy, mm-1, 1);
+            }
+            if(pDate && /^\d{4}-\d{2}-\d{2}$/.test(pDate)){
+                selected = pDate;
+            }
+            monthPicker.value = ym(cur);
+        }
+
+        function syncUrl(){
+            const u = new URL(window.location.href);
+            u.searchParams.set('ym', ym(cur));
+            if(selected) u.searchParams.set('date', selected);
+            else u.searchParams.delete('date');
+            history.replaceState(null, '', u.toString());
+        }
+
+        function shortType(s){
+            if(!s) return '';
+            if(s === '장애지원') return '장애';
+            if(s === '설치지원') return '설치';
+            if(s === '유지보수') return '유지';
+            return s;
+        }
+
+        function getDateStr(x){ return x.supportDate || x.date || ''; }
+        function getId(x){ return x.ticketId || x.id; }
+        function getType(x){ return x.supportType || x.type || ''; }
+        function getProjectName(x){ return x.projectName || x.project_name || ''; }  /* ✅ 추가 */
+
+        function buildSupportIndex(){
+            const map = {};
+            (SUPPORTS || []).forEach(s => {
+                const ds = getDateStr(s);
+                if(!ds) return;
+                if(!map[ds]) map[ds] = [];
+                map[ds].push(s);
+            });
+            return map;
+        }
+
+        const supportIndex = buildSupportIndex();
+
+        function render(){
+            grid.innerHTML = '';
+
+            const y = cur.getFullYear();
+            const m = cur.getMonth();
+            title.textContent = `${y}-${pad2(m+1)}`;
+            monthPicker.value = `${y}-${pad2(m+1)}`;
+
+            const first = new Date(y, m, 1);
+            const last = new Date(y, m+1, 0);
+            const startDay = first.getDay();
+
+            const weekNames = ['일','월','화','수','목','금','토'];
+            weekNames.forEach((w, idx)=>{
+                const h = document.createElement('div');
+                h.className = 'cal-cell cal-head-cell';
+                h.textContent = w;
+                if(idx === 0) h.classList.add('is-sun');
+                if(idx === 6) h.classList.add('is-sat');
+                grid.appendChild(h);
+            });
+
+            for(let i=0;i<startDay;i++){
+                const empty = document.createElement('div');
+                empty.className = 'cal-cell cal-empty';
+                grid.appendChild(empty);
+            }
+
+            const today = new Date();
+            const todayStr = ymd(today);
+
+            for(let day=1; day<=last.getDate(); day++){
+                const d = new Date(y, m, day);
+                const dateStr = ymd(d);
+
+                const cell = document.createElement('div');
+                cell.className = 'cal-cell cal-day';
+                cell.innerHTML = `<div class="cal-num">${day}</div><div class="cal-badges"></div>`;
+
+                const dow = d.getDay();
+                if(dow === 0) cell.classList.add('is-sun');
+                if(dow === 6) cell.classList.add('is-sat');
+                if(dateStr === todayStr) cell.classList.add('is-today');
+                if(selected === dateStr) cell.classList.add('is-selected');
+
+                // 날짜 클릭 => 등록 폼 이동
+                cell.addEventListener('click', ()=>{
+                    selected = dateStr;
+                    syncUrl();
+                    window.location.href = `${NEW_URL}?date=${dateStr}`;
+                });
+
+                const items = supportIndex[dateStr] || [];
+                if(items.length > 0) cell.classList.add('has-items');
+
+                const badges = cell.querySelector('.cal-badges');
+                const maxShow = 2;
+
+                items.slice(0, maxShow).forEach(it => {
+                    const a = document.createElement('a');
+                    a.className = 'cal-badge';
+                    a.href = `${DETAIL_URL}?id=${getId(it)}`;
+
+                    const pName = getProjectName(it);
+                    const tName = shortType(getType(it));
+
+                    /* ✅ 프로젝트명 + (유형) + 제목 */
+                    const label = `${pName ? '[' + pName + '] ' : ''}${tName ? '[' + tName + '] ' : ''}${it.title || ''}`;
+
+                    a.textContent = label.length > 28 ? (label.substring(0, 28) + '…') : label;
+                    a.title = label;
+
+                    // 제목 클릭은 셀 클릭(등록 이동) 막기
+                    a.addEventListener('click', (e)=> e.stopPropagation());
+
+                    badges.appendChild(a);
+                });
+
+                if(items.length > maxShow){
+                    const more = document.createElement('span');
+                    more.className = 'cal-badge-more';
+                    more.textContent = `+${items.length - maxShow}`;
+                    badges.appendChild(more);
+                }
+
+                grid.appendChild(cell);
+            }
+
+            syncUrl();
+        }
+
+        prevBtn.addEventListener('click', ()=>{
+            cur = new Date(cur.getFullYear(), cur.getMonth()-1, 1);
+            render();
+        });
+
+        nextBtn.addEventListener('click', ()=>{
+            cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
+            render();
+        });
+
+        todayBtn.addEventListener('click', ()=>{
+            const t = new Date();
+            cur = new Date(t.getFullYear(), t.getMonth(), 1);
+            selected = ymd(t);
+            render();
+        });
+
+        monthPicker.addEventListener('change', ()=>{
+            if(!monthPicker.value) return;
+            const [yy, mm] = monthPicker.value.split('-').map(Number);
+            cur = new Date(yy, mm-1, 1);
+            render();
+        });
+
+        readInitParams();
+        render();
+    })();
+</script>
+</body>
+</html>

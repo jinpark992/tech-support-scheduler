@@ -43,7 +43,6 @@
                         <th class="col-status">상태</th>
                         <th class="col-dday">마감</th>
                         <th class="col-reg">등록일</th>
-                        <th class="col-actions">관리</th>
                     </tr>
                     </thead>
 
@@ -60,7 +59,8 @@
                                 <span class="code-pill" th:text="${p.projectCode}">TS-XXXX</span>
                                 <button type="button" class="btn btn-ghost btn-sm"
                                         th:attr="data-code=${p.projectCode}"
-                                        onclick="copyCode(this)">복사</button>
+                                        onclick="copyCode(this)">복사
+                                </button>
                             </div>
                         </td>
 
@@ -90,23 +90,7 @@
                     th:text="${p.dday >= 0 ? ('D-' + p.dday) : ('D+' + (p.dday * -1))}">D-12</span>
                             <span th:if="${p.dday == null}">-</span>
                         </td>
-
                         <td class="t-center" th:text="${p.regDate}">2024-05-02</td>
-
-                        <!-- ✅ 관리 -->
-                        <td class="t-center">
-                            <div class="action-cell">
-                                <a class="btn btn-ghost btn-sm"
-                                   th:href="@{/support/project/edit(projectId=${p.projectId})}">수정</a>
-
-                                <form th:action="@{/support/project/delete}" method="post">
-                                    <input type="hidden" name="projectId" th:value="${p.projectId}"/>
-                                    <button type="submit" class="btn btn-ghost btn-sm"
-                                            onclick="return confirm('정말 삭제할까?');">삭제</button>
-                                </form>
-                            </div>
-                        </td>
-
                     </tr>
                     </tbody>
                 </table>

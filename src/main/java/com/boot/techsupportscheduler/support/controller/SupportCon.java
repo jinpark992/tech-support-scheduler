@@ -1,5 +1,12 @@
 package com.boot.techsupportscheduler.support.controller;
 
+import com.boot.techsupportscheduler.support.dao.SupportDao;
+import com.boot.techsupportscheduler.support.service.NoticeSvc;
+import com.boot.techsupportscheduler.support.service.SupportSvc;
+import com.boot.techsupportscheduler.support.vo.Notice;
+import com.boot.techsupportscheduler.support.vo.Support;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -7,28 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @Controller
-@RequestMapping("/support/support")
+@RequestMapping("/support")
+@Log4j2
 public class SupportCon {
+    @Autowired
+    SupportSvc supportSvc;
 
-    // ✅ 더미 프로젝트 목록 (나중에 ProjectCon과 Service로 합치면 됨)
-    private List<Map<String, Object>> dummyProjects() {
-        List<Map<String, Object>> projects = new ArrayList<>();
-
-        Map<String, Object> p1 = new HashMap<>();
-        p1.put("id", 1);
-        p1.put("name", "OO사 유지보수");
-        projects.add(p1);
-
-        Map<String, Object> p2 = new HashMap<>();
-        p2.put("id", 2);
-        p2.put("name", "XX사 설치지원");
-        projects.add(p2);
-
-        return projects;
-    }
-
-    // ✅ 더미 기술지원 일정 목록 (캘린더에 뿌릴 데이터)
-    private List<Map<String, Object>> dummySupports() {
+   /* private List<Map<String, Object>> dummySupports() {
         List<Map<String, Object>> supports = new ArrayList<>();
 
         Map<String, Object> s1 = new HashMap<>();
@@ -36,7 +28,7 @@ public class SupportCon {
         s1.put("date", "2025-12-19");
         s1.put("projectId", 1);
         s1.put("projectName", "OO사 유지보수");
-        s1.put("type", "장애지원"); // 유지보수/설치지원/장애지원 중 하나
+        s1.put("type", "장애지원");
         s1.put("title", "서버 접속 불가");
         s1.put("content", "오전 10시부터 접속이 안된다고 연락옴");
         supports.add(s1);
@@ -52,47 +44,45 @@ public class SupportCon {
         supports.add(s2);
 
         return supports;
-    }
+    }*/
 
-    // 1) ✅ 캘린더 화면
-    // URL: /support/support
-    @GetMapping("/list")
-    public String calendar(Model model) {
+    @GetMapping("/support/list")
+    public String list(Model model) {
+        List<Support> list = supportSvc.doList();
+
         model.addAttribute("activeMenu", "support");
-        model.addAttribute("supports", dummySupports()); // 캘린더에 찍을 일정들
-        return "support/calendar"; // templates/support/calendar.html
+        model.addAttribute("supports", list);   // ✅ list.html에서 SUPPORTS로 쓰는 그 변수
+
+        return "support/list";                 // ✅ redirect 아님
     }
 
-    // 2) ✅ 기술지원 등록 폼
-    // URL: /support/support/new?date=2025-12-19
-    @GetMapping("/new")
-    public String form(@RequestParam(required = false) String date, Model model) {
-        model.addAttribute("activeMenu", "support");
-
-        // 폼 상단에서 프로젝트 선택할 수 있게 프로젝트 목록 같이 던짐
-        model.addAttribute("projects", dummyProjects());
-
-        // 체크박스(유지보수/설치지원/장애지원) 옵션
-        model.addAttribute("supportTypes", List.of("유지보수", "설치지원", "장애지원"));
-
-        // 캘린더에서 날짜 눌러서 들어오면 date가 넘어오는 구조
-        model.addAttribute("selectedDate", date);
-
-        return "support/form"; // templates/support/form.html
-    }
-
-    // 3) ✅ 상세 화면 (id로 조회)
     // URL: /support/support/detail?id=1
-    @GetMapping("/detail")
-    public String detail(@RequestParam int id, Model model) {
+    @GetMapping("/support/detail")
+    public String detail(@RequestParam("id") Long id, Model model) {
         model.addAttribute("activeMenu", "support");
 
-        Map<String, Object> support = dummySupports().stream()
-                .filter(s -> (int) s.get("id") == id)
-                .findFirst()
-                .orElse(null);
+        Support support = supportSvc.doDetail(id); // ✅ DB에서 1건 조회
+
+        if (support == null) {
+            return "redirect:/support/support/list";
+        }
 
         model.addAttribute("support", support);
-        return "support/detail"; // templates/support/detail.html
+        return "support/detail";
+    }
+
+
+
+    // ✅ 기술지원 등록 폼
+    // URL: /support/support/new?date=2025-12-19
+    @GetMapping("/support/new")
+    public String form(@RequestParam(required = false) String date, Model model) {
+        model.addAttribute("activeMenu", "support");
+        model.addAttribute("supportTypes", List.of("유지보수", "설치지원", "장애지원"));
+
+        // 템플릿에서 ${selectedDate}로 쓰면 됨
+        model.addAttribute("selectedDate", date);
+
+        return "support/form";
     }
 }

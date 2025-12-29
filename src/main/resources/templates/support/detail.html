@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" th:with="activeMenu='support'">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>기술지원 상세</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+
+    <style>
+        .detail-card { padding: 18px; }
+        .meta-grid { display:grid; grid-template-columns: 140px 1fr; gap:10px 14px; margin-top: 14px; }
+        .meta-key { opacity:.7; }
+        .badge {
+            display:inline-block; padding:4px 8px; border-radius:999px;
+            border:1px solid rgba(0,0,0,.12); background:#fff; font-size:12px;
+        }
+        .content-box {
+            margin-top: 14px;
+            border:1px solid rgba(0,0,0,.10);
+            border-radius: 12px;
+            background: rgba(0,0,0,.02);
+            padding: 14px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        .actions { display:flex; gap:8px; justify-content:flex-end; margin-top: 14px; flex-wrap:wrap; }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+    <main class="content">
+        <div class="page-head">
+            <h1 class="page-title">기술지원 상세</h1>
+            <div class="page-actions">
+                <a class="btn btn-secondary" th:href="@{/support/support/list}">캘린더로</a>
+                <!-- 날짜 기준으로 등록 화면으로 이동(빠른 재등록) -->
+                <a class="btn btn-primary"
+                   th:href="@{/support/support/new(date=${support.date})}">같은 날짜로 등록</a>
+            </div>
+        </div>
+
+        <div class="card detail-card">
+            <!-- 제목 -->
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div>
+                    <div class="badge" th:text="${support.type}">유형</div>
+                    <h2 style="margin:10px 0 0; font-size:22px; line-height:1.2;"
+                        th:text="${support.title}">제목</h2>
+                </div>
+                <div style="text-align:right; opacity:.75;">
+                    <div>Ticket #<span th:text="${support.id}">1</span></div>
+                </div>
+            </div>
+
+            <!-- 메타정보 -->
+            <div class="meta-grid">
+                <div class="meta-key">지원 날짜</div>
+                <div th:text="${support.date}">2025-12-19</div>
+
+                <div class="meta-key">프로젝트</div>
+                <div th:text="${support.projectName}">OO사 유지보수</div>
+
+                <div class="meta-key">프로젝트 ID</div>
+                <div th:text="${support.projectId}">1</div>
+            </div>
+
+            <!-- 내용 -->
+            <div class="content-box" th:text="${support.content}">
+                내용
+            </div>
+
+            <!-- 액션 -->
+            <div class="actions">
+                <!-- 수정/삭제는 DB 붙인 다음에 연결 추천 -->
+                <!-- <a class="btn btn-secondary" th:href="@{/support/support/edit(id=${support.id})}">수정</a> -->
+                <!-- <a class="btn btn-danger" th:href="@{/support/support/delete(id=${support.id})}">삭제</a> -->
+                <a class="btn btn-secondary" th:href="@{/support/support/list}">목록</a>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+</body>
+</html>

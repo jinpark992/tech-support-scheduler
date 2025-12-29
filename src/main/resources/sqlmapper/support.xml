@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.techsupportscheduler.support.dao.SupportDao">
+
+    <!-- 목록 -->
+    <select id="doList" resultType="com.boot.techsupportscheduler.support.vo.Support">
+        SELECT
+        ticket_id      AS ticketId,
+        support_date   AS supportDate,
+        project_id     AS projectId,
+        project_name   AS projectName,
+        support_type   AS supportType,
+        status         AS status,
+        title          AS title,
+        content        AS content,
+        created_at     AS createdAt,
+        updated_at     AS updatedAt,
+        deleted_yn     AS deletedYn,
+        deleted_at     AS deletedAt
+        FROM support_ticket
+        WHERE deleted_yn = 'N'
+        ORDER BY support_date ASC, ticket_id ASC
+    </select>
+
+
+   <!-- &lt;!&ndash; 상세 1건 &ndash;&gt;
+    <select id="doDetail" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">
+        SELECT
+        notice_id  AS noticeId,
+        is_top     AS isTop,
+        title      AS title,
+        content    AS content,
+        views      AS views,
+        created_at AS createdAt,
+        updated_at AS updatedAt,
+        deleted_yn AS deleteYn,
+        deleted_at AS deletedAt
+        FROM notice
+        WHERE notice_id = #{noticeId}
+        AND deleted_yn = 'N'
+    </select>
+
+    &lt;!&ndash; 이전글 (id, title만 채워짐) &ndash;&gt;
+    <select id="doPrev" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">
+        SELECT
+        notice_id AS noticeId,
+        title     AS title
+        FROM notice
+        WHERE deleted_yn = 'N'
+        AND notice_id &lt; #{noticeId}
+        ORDER BY notice_id DESC
+        LIMIT 1
+    </select>
+
+    &lt;!&ndash; 다음글 (id, title만 채워짐) &ndash;&gt;
+    <select id="doNext" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">
+        SELECT
+        notice_id AS noticeId,
+        title     AS title
+        FROM notice
+        WHERE deleted_yn = 'N'
+        AND notice_id &gt; #{noticeId}
+        ORDER BY notice_id ASC
+        LIMIT 1
+    </select>
+
+    &lt;!&ndash; 등록 &ndash;&gt;
+    <insert id="doInsert"
+            parameterType="com.boot.techsupportscheduler.support.vo.Notice"
+            useGeneratedKeys="true" keyProperty="noticeId">
+        INSERT INTO notice
+        (is_top, title, content, views, created_at, updated_at, deleted_yn, deleted_at)
+        VALUES
+        (#{isTop}, #{title}, #{content}, 0, NOW(), NOW(), 'N', NULL)
+    </insert>
+
+    &lt;!&ndash; 조회수 증가 &ndash;&gt;
+    <update id="increaseViews" parameterType="long">
+        UPDATE notice
+        SET views = views + 1
+        WHERE notice_id = #{noticeId}
+        AND deleted_yn = 'N'
+    </update>
+
+    &lt;!&ndash; 삭제(소프트 삭제 추천) &ndash;&gt;
+    <update id="doDelete" parameterType="long">
+        UPDATE notice
+        SET deleted_yn = 'Y',
+        deleted_at = NOW()
+        WHERE notice_id = #{noticeId}
+    </update>
+
+
+
+
+    <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Notice">
+        UPDATE notice
+        SET
+        is_top = #{isTop},
+        title = #{title},
+        content = #{content},
+        updated_at = NOW()
+        WHERE notice_id = #{noticeId}
+        AND deleted_yn = 'N'
+    </update>
+-->
+</mapper>

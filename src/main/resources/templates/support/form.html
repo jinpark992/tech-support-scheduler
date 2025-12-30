@@ -20,7 +20,7 @@
 
         <div class="card form-card">
             <!-- ✅ 컨트롤러에서 model.addAttribute("support", new Support()) 필수 -->
-            <form th:action="@{/support/support/create}" method="post" th:object="${support}">
+            <form th:action="@{/support/support/new}" method="post" th:object="${support}">
                 <div class="form-grid">
 
                     <div class="field">

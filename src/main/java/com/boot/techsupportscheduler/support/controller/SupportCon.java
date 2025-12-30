@@ -2,6 +2,7 @@ package com.boot.techsupportscheduler.support.controller;
 
 import com.boot.techsupportscheduler.support.dao.SupportDao;
 import com.boot.techsupportscheduler.support.service.NoticeSvc;
+import com.boot.techsupportscheduler.support.service.ProjectSvc;
 import com.boot.techsupportscheduler.support.service.SupportSvc;
 import com.boot.techsupportscheduler.support.vo.Notice;
 import com.boot.techsupportscheduler.support.vo.Support;
@@ -19,32 +20,9 @@ import java.util.*;
 public class SupportCon {
     @Autowired
     SupportSvc supportSvc;
+    @Autowired
+    ProjectSvc projectSvc; // ✅ 필요 (프로젝트 드롭다운)
 
-   /* private List<Map<String, Object>> dummySupports() {
-        List<Map<String, Object>> supports = new ArrayList<>();
-
-        Map<String, Object> s1 = new HashMap<>();
-        s1.put("id", 1);
-        s1.put("date", "2025-12-19");
-        s1.put("projectId", 1);
-        s1.put("projectName", "OO사 유지보수");
-        s1.put("type", "장애지원");
-        s1.put("title", "서버 접속 불가");
-        s1.put("content", "오전 10시부터 접속이 안된다고 연락옴");
-        supports.add(s1);
-
-        Map<String, Object> s2 = new HashMap<>();
-        s2.put("id", 2);
-        s2.put("date", "2025-12-20");
-        s2.put("projectId", 2);
-        s2.put("projectName", "XX사 설치지원");
-        s2.put("type", "설치지원");
-        s2.put("title", "초기 설치 진행");
-        s2.put("content", "현장 방문 설치 예정");
-        supports.add(s2);
-
-        return supports;
-    }*/
 
     @GetMapping("/support/list")
     public String list(Model model) {
@@ -73,16 +51,29 @@ public class SupportCon {
 
 
 
-    // ✅ 기술지원 등록 폼
-    // URL: /support/support/new?date=2025-12-19
+    // 2) 등록 폼 화면
+    // URL: http://localhost:8086/support/notice/new
     @GetMapping("/support/new")
-    public String form(@RequestParam(required = false) String date, Model model) {
+    public String getForm(Model model) {
         model.addAttribute("activeMenu", "support");
-        model.addAttribute("supportTypes", List.of("유지보수", "설치지원", "장애지원"));
-
-        // 템플릿에서 ${selectedDate}로 쓰면 됨
-        model.addAttribute("selectedDate", date);
-
+        model.addAttribute("support", new Support());
+        model.addAttribute("projects", projectSvc.doList());
         return "support/form";
+    }
+
+
+    // ✅ 등록 처리
+    @PostMapping("/support/new")
+    public String postForm(@ModelAttribute("support") Support support, Model model) {
+
+        // Support 기본값 세팅(너 테이블 컬럼 기준에 맞춰서)
+        if (support.getDeletedYn() == null) support.setDeletedYn("N");
+        if (support.getStatus() == null || support.getStatus().isBlank()) support.setStatus("OPEN");
+
+        log.info("등록 요청 support = {}", support);
+
+        supportSvc.doInsert(support);
+
+        return "redirect:/support/support/list"; // ✅ 경로 맞추기s
     }
 }

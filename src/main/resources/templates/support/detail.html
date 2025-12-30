@@ -35,9 +35,12 @@
             <h1 class="page-title">기술지원 상세</h1>
             <div class="page-actions">
                 <a class="btn btn-secondary" th:href="@{/support/support/list}">캘린더로</a>
-                <!-- 날짜 기준으로 등록 화면으로 이동(빠른 재등록) -->
+
+                <!-- ✅ 날짜 기준으로 등록 화면으로 이동(빠른 재등록) -->
                 <a class="btn btn-primary"
-                   th:href="@{/support/support/new(date=${support.date})}">같은 날짜로 등록</a>
+                   th:href="@{/support/supportnew(date=${support.supportDate})}">
+                    같은 날짜로 등록
+                </a>
             </div>
         </div>
 
@@ -45,25 +48,33 @@
             <!-- 제목 -->
             <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
                 <div>
-                    <div class="badge" th:text="${support.type}">유형</div>
+                    <!-- ✅ support.type -> support.supportType -->
+                    <div class="badge" th:text="${support.supportType}">유형</div>
+
                     <h2 style="margin:10px 0 0; font-size:22px; line-height:1.2;"
                         th:text="${support.title}">제목</h2>
                 </div>
+
                 <div style="text-align:right; opacity:.75;">
-                    <div>Ticket #<span th:text="${support.id}">1</span></div>
+                    <!-- ✅ support.id -> support.ticketId -->
+                    <div>Ticket #<span th:text="${support.ticketId}">1</span></div>
                 </div>
             </div>
 
             <!-- 메타정보 -->
             <div class="meta-grid">
                 <div class="meta-key">지원 날짜</div>
-                <div th:text="${support.date}">2025-12-19</div>
+                <!-- ✅ support.date -> support.supportDate -->
+                <div th:text="${support.supportDate}">2025-12-19</div>
 
                 <div class="meta-key">프로젝트</div>
                 <div th:text="${support.projectName}">OO사 유지보수</div>
 
                 <div class="meta-key">프로젝트 ID</div>
                 <div th:text="${support.projectId}">1</div>
+
+                <div class="meta-key">상태</div>
+                <div th:text="${support.status}">접수</div>
             </div>
 
             <!-- 내용 -->
@@ -74,8 +85,8 @@
             <!-- 액션 -->
             <div class="actions">
                 <!-- 수정/삭제는 DB 붙인 다음에 연결 추천 -->
-                <!-- <a class="btn btn-secondary" th:href="@{/support/support/edit(id=${support.id})}">수정</a> -->
-                <!-- <a class="btn btn-danger" th:href="@{/support/support/delete(id=${support.id})}">삭제</a> -->
+                <!-- <a class="btn btn-secondary" th:href="@{/support/support/edit(id=${support.ticketId})}">수정</a> -->
+                <!-- <a class="btn btn-danger" th:href="@{/support/support/delete(id=${support.ticketId})}">삭제</a> -->
                 <a class="btn btn-secondary" th:href="@{/support/support/list}">목록</a>
             </div>
         </div>

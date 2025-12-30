@@ -15,8 +15,28 @@
         .cal-cell.is-sat .cal-num { color:#2563eb; }
         .cal-day.is-selected { outline:2px solid rgba(59,130,246,.35); border-radius:12px; }
 
-        /* ✅ 뱃지(프로젝트명+제목) 표시용 */
-        .cal-badges { margin-top:6px; display:flex; flex-direction:column; gap:4px; }
+        /* ✅ 날짜칸: 위(날짜) + 아래(뱃지) 구조 + 높이 고정(스크롤) */
+        .cal-day{
+            display:flex;
+            flex-direction:column;
+            height:120px;            /* 필요하면 140~160으로 조절 */
+            cursor: default;
+        }
+        .cal-day.has-items { cursor: default; }
+
+        /* ✅ 뱃지(프로젝트명+제목) 표시용 + 내부 스크롤 */
+        .cal-badges {
+            margin-top:6px;
+            display:flex;
+            flex-direction:column;
+            gap:4px;
+
+            flex:1;
+            overflow-y:auto;
+            padding-right:2px;       /* 스크롤바 겹침 방지 */
+        }
+        .cal-badges::-webkit-scrollbar { width: 6px; } /* (선택) 스크롤바 얇게 */
+
         .cal-badge {
             display:inline-block;
             padding:3px 6px;
@@ -28,9 +48,6 @@
             text-decoration:none;
         }
         .cal-badge:hover { text-decoration:underline; }
-        .cal-badge-more { font-size:12px; opacity:.7; padding-left:2px; }
-        .cal-day.has-items { background: rgba(0,0,0,.02); border-radius:12px; cursor:pointer; }
-        .cal-day { cursor:pointer; }
     </style>
 </head>
 
@@ -65,7 +82,7 @@
             </div>
 
             <div class="cal-hint">
-                날짜 클릭 → 등록 폼 이동 / (프로젝트명+제목) 클릭 → 상세 보기
+                (프로젝트명+제목) 클릭 → 상세 보기 / 등록은 상단 버튼
             </div>
         </div>
     </main>
@@ -137,7 +154,7 @@
         function getDateStr(x){ return x.supportDate || x.date || ''; }
         function getId(x){ return x.ticketId || x.id; }
         function getType(x){ return x.supportType || x.type || ''; }
-        function getProjectName(x){ return x.projectName || x.project_name || ''; }  /* ✅ 추가 */
+        function getProjectName(x){ return x.projectName || x.project_name || ''; }
 
         function buildSupportIndex(){
             const map = {};
@@ -197,45 +214,29 @@
                 if(dateStr === todayStr) cell.classList.add('is-today');
                 if(selected === dateStr) cell.classList.add('is-selected');
 
-                // 날짜 클릭 => 등록 폼 이동
-                cell.addEventListener('click', ()=>{
-                    selected = dateStr;
-                    syncUrl();
-                    window.location.href = `${NEW_URL}?date=${dateStr}`;
-                });
-
                 const items = supportIndex[dateStr] || [];
                 if(items.length > 0) cell.classList.add('has-items');
 
                 const badges = cell.querySelector('.cal-badges');
-                const maxShow = 2;
 
-                items.slice(0, maxShow).forEach(it => {
+                // ✅ 제한 없이 전부 표시 (셀 내부 스크롤로 확인)
+                items.forEach(it => {
                     const a = document.createElement('a');
                     a.className = 'cal-badge';
                     a.href = `${DETAIL_URL}?id=${getId(it)}`;
 
                     const pName = getProjectName(it);
                     const tName = shortType(getType(it));
-
-                    /* ✅ 프로젝트명 + (유형) + 제목 */
                     const label = `${pName ? '[' + pName + '] ' : ''}${tName ? '[' + tName + '] ' : ''}${it.title || ''}`;
 
                     a.textContent = label.length > 28 ? (label.substring(0, 28) + '…') : label;
                     a.title = label;
 
-                    // 제목 클릭은 셀 클릭(등록 이동) 막기
+                    // ✅ 제목 클릭은 셀 이벤트로 번지지 않게(안전)
                     a.addEventListener('click', (e)=> e.stopPropagation());
 
                     badges.appendChild(a);
                 });
-
-                if(items.length > maxShow){
-                    const more = document.createElement('span');
-                    more.className = 'cal-badge-more';
-                    more.textContent = `+${items.length - maxShow}`;
-                    badges.appendChild(more);
-                }
 
                 grid.appendChild(cell);
             }

@@ -10,4 +10,8 @@ import java.util.List;
 public interface SupportDao {
 
     List<Support> doList();
+
+    Support doDetail(Long id);
+
+    void doInsert(Support support);
 }

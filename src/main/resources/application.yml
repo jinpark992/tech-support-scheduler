@@ -25,3 +25,9 @@ mybatis:
   mapper-locations: classpath:sqlmapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com.boot.techsupportscheduler.support.dao: DEBUG
+    org.mybatis: DEBUG
+    org.apache.ibatis: DEBUG

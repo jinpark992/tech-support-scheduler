@@ -5,6 +5,7 @@ import com.boot.techsupportscheduler.support.service.NoticeSvc;
 import com.boot.techsupportscheduler.support.service.ProjectSvc;
 import com.boot.techsupportscheduler.support.service.SupportSvc;
 import com.boot.techsupportscheduler.support.vo.Notice;
+import com.boot.techsupportscheduler.support.vo.Project;
 import com.boot.techsupportscheduler.support.vo.Support;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,18 @@ public class SupportCon {
     public String getForm(Model model) {
         model.addAttribute("activeMenu", "support");
         model.addAttribute("support", new Support());
-        model.addAttribute("projects", projectSvc.doList());
+
+        List<Project> projects = projectSvc.doList();
+        model.addAttribute("projects", projects);
+
+        List<String> salesManagers = projects.stream()
+                .map(Project::getSalesManager)
+                .filter(Objects::nonNull)
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .toList();
+        model.addAttribute("salesManagers", salesManagers);
+
         return "support/form";
     }
 
@@ -74,6 +86,13 @@ public class SupportCon {
 
         supportSvc.doInsert(support);
 
-        return "redirect:/support/support/list"; // ✅ 경로 맞추기s
+        return "redirect:/support/support/list"; // ✅ 경로 맞추기
+    }
+
+    @PostMapping("/support/delete")
+    public String doDelete(@RequestParam("id") Long id){
+        log.info("SupportId : " + id);
+        supportSvc.doDelete(id);
+        return "redirect:/support/support/list"; // ✅ 경로 맞추기
     }
 }

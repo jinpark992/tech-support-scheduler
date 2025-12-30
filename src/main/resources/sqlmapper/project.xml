@@ -8,28 +8,29 @@
     <!-- 목록 -->
     <select id="doList" resultType="com.boot.techsupportscheduler.support.vo.Project">
         SELECT
-        project_id,
-        project_code,
-        project_name,
-        client_name,
-        sales_manager,
-        contract_amount,
-        status,
-        reg_date,
-        end_date,
+        project_id      AS projectId,
+        project_code    AS projectCode,
+        project_name    AS projectName,
+        client_name     AS clientName,
+        sales_manager   AS salesManager,
+        contract_amount AS contractAmount,
+        status          AS status,
+        reg_date        AS regDate,
+        end_date        AS endDate,
         DATEDIFF(end_date, CURDATE()) AS dday,
-        created_at,
-        updated_at,
-        deleted_yn,
-        deleted_at,
-        memo
+        created_at      AS createdAt,
+        updated_at      AS updatedAt,
+        deleted_yn      AS deletedYn,
+        deleted_at      AS deletedAt,
+        memo            AS memo
         FROM project
         WHERE deleted_yn = 'N'
         ORDER BY project_id DESC
     </select>
 
 
-<!--    &lt;!&ndash; 상세 1건 &ndash;&gt;-->
+
+    <!--    &lt;!&ndash; 상세 1건 &ndash;&gt;-->
     <select id="doDetail"
             parameterType="long"
             resultType="com.boot.techsupportscheduler.support.vo.Project">

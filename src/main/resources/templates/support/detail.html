@@ -24,6 +24,8 @@
             line-height: 1.5;
         }
         .actions { display:flex; gap:8px; justify-content:flex-end; margin-top: 14px; flex-wrap:wrap; }
+        .btn-danger { background:#ef4444; color:#fff; border:1px solid rgba(0,0,0,.08); }
+        .btn-danger:hover { filter: brightness(.96); }
     </style>
 </head>
 <body>
@@ -36,9 +38,9 @@
             <div class="page-actions">
                 <a class="btn btn-secondary" th:href="@{/support/support/list}">캘린더로</a>
 
-                <!-- ✅ 날짜 기준으로 등록 화면으로 이동(빠른 재등록) -->
+                <!-- ✅ 오타 수정: supportnew -> support/new -->
                 <a class="btn btn-primary"
-                   th:href="@{/support/supportnew(date=${support.supportDate})}">
+                   th:href="@{/support/support/new(date=${support.supportDate})}">
                     같은 날짜로 등록
                 </a>
             </div>
@@ -48,7 +50,6 @@
             <!-- 제목 -->
             <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
                 <div>
-                    <!-- ✅ support.type -> support.supportType -->
                     <div class="badge" th:text="${support.supportType}">유형</div>
 
                     <h2 style="margin:10px 0 0; font-size:22px; line-height:1.2;"
@@ -56,7 +57,6 @@
                 </div>
 
                 <div style="text-align:right; opacity:.75;">
-                    <!-- ✅ support.id -> support.ticketId -->
                     <div>Ticket #<span th:text="${support.ticketId}">1</span></div>
                 </div>
             </div>
@@ -64,17 +64,19 @@
             <!-- 메타정보 -->
             <div class="meta-grid">
                 <div class="meta-key">지원 날짜</div>
-                <!-- ✅ support.date -> support.supportDate -->
                 <div th:text="${support.supportDate}">2025-12-19</div>
 
+                <div class="meta-key">영업담당자</div>
+                <div th:text="${support.salesManager != null ? support.salesManager : '-'}">-</div>
+
                 <div class="meta-key">프로젝트</div>
-                <div th:text="${support.projectName}">OO사 유지보수</div>
+                <div th:text="${support.projectName}">프로젝트명</div>
 
                 <div class="meta-key">프로젝트 ID</div>
                 <div th:text="${support.projectId}">1</div>
 
                 <div class="meta-key">상태</div>
-                <div th:text="${support.status}">접수</div>
+                <div th:text="${support.status}">OPEN</div>
             </div>
 
             <!-- 내용 -->
@@ -82,11 +84,17 @@
                 내용
             </div>
 
-            <!-- 액션 -->
+            <!-- ✅ 액션(수정/삭제/목록) -->
             <div class="actions">
-                <!-- 수정/삭제는 DB 붙인 다음에 연결 추천 -->
-                <!-- <a class="btn btn-secondary" th:href="@{/support/support/edit(id=${support.ticketId})}">수정</a> -->
-                <!-- <a class="btn btn-danger" th:href="@{/support/support/delete(id=${support.ticketId})}">삭제</a> -->
+                <a class="btn btn-secondary"
+                   th:href="@{/support/support/edit(id=${support.ticketId})}">수정</a>
+
+                <form th:action="@{/support/support/delete}" method="post" style="display:inline;"
+                      onsubmit="return confirm('정말 삭제할까요?');">
+                    <input type="hidden" name="id" th:value="${support.ticketId}">
+                    <button class="btn btn-danger" type="submit">삭제</button>
+                </form>
+
                 <a class="btn btn-secondary" th:href="@{/support/support/list}">목록</a>
             </div>
         </div>

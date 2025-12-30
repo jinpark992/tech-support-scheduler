@@ -24,4 +24,7 @@ public class Support {
 
     private String deletedYn;         // deleted_yn ('N'/'Y')
     private LocalDateTime deletedAt;  // deleted_at
+
+    private String salesManager;   // 영업담당자명
+
 }

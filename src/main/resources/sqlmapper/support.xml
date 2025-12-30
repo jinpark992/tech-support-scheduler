@@ -32,6 +32,7 @@
         s.support_date   AS supportDate,
         s.project_id     AS projectId,
         p.project_name   AS projectName,
+        p.sales_manager  AS salesManager,
         s.support_type   AS supportType,
         s.status         AS status,
         s.title          AS title,
@@ -46,6 +47,7 @@
         AND s.deleted_yn = 'N'
         LIMIT 1
     </select>
+
 
 
     <!-- 등록
@@ -72,10 +74,20 @@
         #{title},
         #{content},
         NOW(),
-        NOW(),
+        NOW(),  
         IFNULL(#{deletedYn}, 'N')
         )
     </insert>
+
+    <!-- 삭제(소프트 삭제) -->
+    <update id="doDelete" parameterType="long">
+        UPDATE support
+        SET deleted_yn = 'Y',
+        deleted_at = NOW(),
+        updated_at = NOW()
+        WHERE ticket_id = #{id}
+        AND deleted_yn = 'N'
+    </update>
 
 
 

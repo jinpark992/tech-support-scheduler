@@ -33,4 +33,9 @@ public class SupportSvc {
         supportDao.doInsert(support);
         return;
     }
+
+    public void doDelete(Long id) {
+        supportDao.doDelete(id);
+        return;
+    }
 }

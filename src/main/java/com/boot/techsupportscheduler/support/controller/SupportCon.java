@@ -95,4 +95,42 @@ public class SupportCon {
         supportSvc.doDelete(id);
         return "redirect:/support/support/list"; // ✅ 경로 맞추기
     }
+
+    // ✅ 수정 폼
+    @GetMapping("/support/edit")
+    public String editForm(@RequestParam("id") Long id, Model model) {
+        model.addAttribute("activeMenu", "support");
+
+        Support support = supportSvc.doDetail(id);
+        if (support == null) return "redirect:/support/support/list";
+
+        model.addAttribute("support", support);
+
+        // 프로젝트 목록(드롭다운)
+        List<Project> projects = projectSvc.doList();
+        model.addAttribute("projects", projects);
+
+        // 영업담당자 목록(필터 select)
+        List<String> salesManagers = projects.stream()
+                .map(Project::getSalesManager)
+                .filter(Objects::nonNull)
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .toList();
+        model.addAttribute("salesManagers", salesManagers);
+
+        return "support/edit";
+    }
+
+    // ✅ 수정 처리
+    @PostMapping("/support/update")
+    public String doUpdate(@ModelAttribute("support") Support support) {
+
+        // 기본값 방어
+        if (support.getStatus() == null || support.getStatus().isBlank()) support.setStatus("OPEN");
+
+        supportSvc.doUpdate(support);
+
+        return "redirect:/support/support/detail?id=" + support.getTicketId();
+    }
 }

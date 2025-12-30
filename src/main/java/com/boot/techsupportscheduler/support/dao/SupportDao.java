@@ -16,4 +16,6 @@ public interface SupportDao {
     void doInsert(Support support);
 
     void doDelete(Long id);
+
+    void doUpdate(Support support);
 }

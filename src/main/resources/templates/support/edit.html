@@ -46,7 +46,7 @@
 
                     <div class="field">
                         <label class="label">지원 날짜</label>
-                        <input class="input" type="date" th:field="*{supportDate}"/>
+                        <input class="input" type="date" th:field="*{supportDate}" required/>
                         <div class="field-error"
                              th:if="${#fields.hasErrors('supportDate')}"
                              th:errors="*{supportDate}"></div>

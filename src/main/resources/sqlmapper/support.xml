@@ -9,7 +9,7 @@
     <select id="doList" resultType="com.boot.techsupportscheduler.support.vo.Support">
         SELECT
         s.ticket_id      AS ticketId,
-        s.support_date   AS supportDate,
+        DATE_FORMAT(s.support_date, '%Y-%m-%d') AS supportDate,
         s.project_id     AS projectId,
         p.project_name   AS projectName,
         s.support_type   AS supportType,
@@ -28,25 +28,26 @@
 
     <select id="doDetail" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Support">
         SELECT
-        s.ticket_id      AS ticketId,
-        s.support_date   AS supportDate,
-        s.project_id     AS projectId,
-        p.project_name   AS projectName,
-        p.sales_manager  AS salesManager,
-        s.support_type   AS supportType,
-        s.status         AS status,
-        s.title          AS title,
-        s.content        AS content,
-        s.created_at     AS createdAt,
-        s.updated_at     AS updatedAt,
-        s.deleted_yn     AS deletedYn,
-        s.deleted_at     AS deletedAt
+        s.ticket_id AS ticketId,
+        DATE_FORMAT(s.support_date, '%Y-%m-%d') AS supportDate,
+        s.project_id AS projectId,
+        p.project_name AS projectName,
+        p.sales_manager AS salesManager,
+        s.support_type AS supportType,
+        s.status AS status,
+        s.title AS title,
+        s.content AS content,
+        s.created_at AS createdAt,
+        s.updated_at AS updatedAt,
+        s.deleted_yn AS deletedYn,
+        s.deleted_at AS deletedAt
         FROM support s
         LEFT JOIN project p ON p.project_id = s.project_id
         WHERE s.ticket_id = #{id}
         AND s.deleted_yn = 'N'
         LIMIT 1
     </select>
+
 
 
 
@@ -74,7 +75,7 @@
         #{title},
         #{content},
         NOW(),
-        NOW(),  
+        NOW(),
         IFNULL(#{deletedYn}, 'N')
         )
     </insert>
@@ -88,6 +89,22 @@
         WHERE ticket_id = #{id}
         AND deleted_yn = 'N'
     </update>
+
+    <!-- 수정 -->
+    <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Support">
+        UPDATE support
+        SET
+        support_date = #{supportDate},
+        project_id   = #{projectId},
+        support_type = #{supportType},
+        status       = #{status},
+        title        = #{title},
+        content      = #{content},
+        updated_at   = NOW()
+        WHERE ticket_id = #{ticketId}
+        AND deleted_yn = 'N'
+    </update>
+
 
 
 

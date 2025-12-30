@@ -38,4 +38,9 @@ public class SupportSvc {
         supportDao.doDelete(id);
         return;
     }
+
+    public void doUpdate(Support support) {
+        supportDao.doUpdate(support);
+        return;
+    }
 }

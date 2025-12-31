@@ -5,6 +5,7 @@ import com.boot.techsupportscheduler.support.service.NoticeSvc;
 import com.boot.techsupportscheduler.support.service.ProjectSvc;
 import com.boot.techsupportscheduler.support.vo.Notice;
 import com.boot.techsupportscheduler.support.vo.Project;
+import com.boot.techsupportscheduler.support.vo.ProjectPageResult;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,37 +21,25 @@ public class ProjectCon {
     @Autowired
     ProjectSvc projectSvc;
 
+    // ✅ 목록(기본) - GET
     @GetMapping("/list")
-    public String list(Model model) {
-
-        List<Project> list = projectSvc.doList();
-
-//        Map<String, Object> p1 = new HashMap<>();
-//        p1.put("projectId", 1L);
-//        p1.put("projectCode", "TS-202512-8F3K2Q");
-//        p1.put("projectName", "OO사 유지보수");
-//        p1.put("clientName", "OO주식회사");
-//        p1.put("salesManager", "홍길동");
-//        p1.put("contractAmount", 15000000L);
-//        p1.put("status", "진행중");
-//        p1.put("dday", 12);
-//        p1.put("regDate", "2024-05-02");
-//        projects.add(p1);
-//
-//        Map<String, Object> p2 = new HashMap<>();
-//        p2.put("projectId", 2L);
-//        p2.put("projectCode", "TS-202512-9F3K2Q");
-//        p2.put("projectName", "XX사 설치지원");
-//        p2.put("clientName", "XX주식회사");
-//        p2.put("salesManager", "홍길동");
-//        p2.put("contractAmount", 7000000L);
-//        p2.put("status", "대기");
-//        p2.put("dday", -3);
-//        p2.put("regDate", "2024-04-30");
-//        projects.add(p2);
+    public String list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model
+    ) {
+        ProjectPageResult r = projectSvc.doSearchPaged("all", null, "", "new", page, size);
 
         model.addAttribute("activeMenu", "project");
-        model.addAttribute("projects", list);
+        model.addAttribute("projects", r.getProjects());
+        model.addAttribute("pageInfo", r.getPageInfo());
+
+        // ✅ 화면 선택값 유지(기본값)
+        model.addAttribute("field", "all");
+        model.addAttribute("q", r.getQ());
+        model.addAttribute("status", "");
+        model.addAttribute("sort", "new");
+
         return "project/list";
     }
 
@@ -124,6 +113,33 @@ public class ProjectCon {
         projectSvc.doUpdate(project);
 
         return "redirect:/support/project/detail?projectId=" + project.getProjectId();
+    }
+
+
+    // ✅ 검색(POST 유지) + 페이징(POST로 페이지 이동)
+    @PostMapping("/search")
+    public String search(
+            @RequestParam(defaultValue = "all") String field,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "new") String sort,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model
+    ) {
+        ProjectPageResult r = projectSvc.doSearchPaged(field, q, status, sort, page, size);
+
+        model.addAttribute("activeMenu", "project");
+        model.addAttribute("projects", r.getProjects());
+        model.addAttribute("pageInfo", r.getPageInfo());
+
+        // ✅ 화면 선택값 유지
+        model.addAttribute("field", field);
+        model.addAttribute("q", r.getQ());
+        model.addAttribute("status", status);
+        model.addAttribute("sort", sort);
+
+        return "project/list";
     }
 
 

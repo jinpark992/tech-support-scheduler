@@ -4,7 +4,35 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>프로젝트 관리</title>
+
     <link rel="stylesheet" th:href="@{/css/app.css}"/>
+
+    <style>
+        /* ✅ 공지사항처럼 깔끔한 검색 바 */
+        .search-card{
+            margin: 12px 0 14px;
+            padding: 14px;
+            border: 1px solid rgba(0,0,0,.08);
+            border-radius: 14px;
+            background: #fff;
+        }
+        .search-grid{
+            display:grid;
+            grid-template-columns: 140px 1fr 140px 140px auto;
+            gap: 10px;
+            align-items:end;
+        }
+        .search-grid .field{ margin:0; }
+        .search-actions{ display:flex; gap:8px; justify-content:flex-end; }
+
+        @media (max-width: 1024px){
+            .search-grid{ grid-template-columns: 1fr 1fr; }
+            .search-actions{ justify-content:flex-start; }
+        }
+        @media (max-width: 640px){
+            .search-grid{ grid-template-columns: 1fr; }
+        }
+    </style>
 
     <script>
         function copyCode(btn) {
@@ -14,14 +42,29 @@
                 .then(() => alert("프로젝트 코드 복사됨: " + code))
                 .catch(() => alert("복사 실패 (브라우저 권한 확인)"));
         }
+
+        // ✅ 페이징: POST 유지하면서 페이지 이동 (검색폼에 page만 바꿔서 submit)
+        function goPage(p) {
+            const fm = document.getElementById("projectSearchForm");
+            if (!fm) return;
+
+            const pageInput = fm.querySelector("input[name='page']");
+            if (pageInput) pageInput.value = p;
+
+            fm.submit();
+        }
     </script>
 </head>
 
 <body>
 <div class="app-shell">
+
+    <!-- HEADER -->
     <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
 
+    <!-- CONTENT -->
     <main class="content">
+
         <div class="page-head">
             <div>
                 <h1 class="page-title">프로젝트 관리</h1>
@@ -32,6 +75,62 @@
             </div>
         </div>
 
+        <!-- ✅ 검색 + 정렬 (POST 유지) -->
+        <div class="search-card">
+            <!-- ⚠️ action 경로는 네 컨트롤러에 맞춰줘:
+                 예: @PostMapping("/search") 만들면 /support/project/search 가 맞음 -->
+            <form id="projectSearchForm" th:action="@{/support/project/search}" method="post">
+                <div class="search-grid">
+
+                    <div class="field">
+                        <label class="label">검색 대상</label>
+                        <select class="select" name="field">
+                            <option value="all" th:selected="${field == null or field == 'all'}">전체</option>
+                            <option value="projectName" th:selected="${field == 'projectName'}">프로젝트</option>
+                            <option value="projectCode" th:selected="${field == 'projectCode'}">프로젝트 코드</option>
+                            <option value="clientName" th:selected="${field == 'clientName'}">고객사</option>
+                            <option value="salesManager" th:selected="${field == 'salesManager'}">영업</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">검색어</label>
+                        <input class="input" type="text" name="q" placeholder="검색어 입력" th:value="${q}">
+                    </div>
+
+                    <div class="field">
+                        <label class="label">상태</label>
+                        <select class="select" name="status">
+                            <option value="" th:selected="${status == null or status == ''}">전체</option>
+                            <option value="진행중" th:selected="${status == '진행중'}">진행중</option>
+                            <option value="대기" th:selected="${status == '대기'}">대기</option>
+                            <option value="완료" th:selected="${status == '완료'}">완료</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">정렬</label>
+                        <select class="select" name="sort">
+                            <option value="new" th:selected="${sort == null or sort == 'new'}">최신순</option>
+                            <option value="old" th:selected="${sort == 'old'}">오래된순</option>
+                            <option value="deadline" th:selected="${sort == 'deadline'}">마감임박순</option>
+                        </select>
+                    </div>
+
+                    <div class="search-actions">
+                        <!-- ✅ 검색 누르면 1페이지부터 -->
+                        <input type="hidden" name="page" th:value="${pageInfo != null ? pageInfo.page : 1}">
+                        <input type="hidden" name="size" th:value="${pageInfo != null ? pageInfo.size : 10}">
+
+                        <button type="submit" class="btn btn-primary" onclick="goPage(1); return false;">검색</button>
+                        <a class="btn btn-secondary" th:href="@{/support/project/list}">초기화</a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        <!-- 목록 -->
         <div class="card">
             <div class="table-wrap">
                 <table class="tbl tbl-project">
@@ -48,19 +147,20 @@
 
                     <tbody>
                     <tr th:if="${#lists.isEmpty(projects)}">
-                        <td class="empty" colspan="7">등록된 프로젝트가 없습니다.</td>
+                        <td class="empty" colspan="6">등록된 프로젝트가 없습니다.</td>
                     </tr>
 
                     <tr th:each="p, stat : ${projects}">
-                        <td class="t-center" th:text="${stat.count}">1</td>
+                        <!-- ✅ 페이지 넘어가도 번호 이어지게 -->
+                        <td class="t-center"
+                            th:text="${pageInfo != null ? (pageInfo.offset + stat.count) : stat.count}">1</td>
 
                         <td class="t-center">
                             <div class="code-cell">
                                 <span class="code-pill" th:text="${p.projectCode}">TS-XXXX</span>
                                 <button type="button" class="btn btn-ghost btn-sm"
                                         th:attr="data-code=${p.projectCode}"
-                                        onclick="copyCode(this)">복사
-                                </button>
+                                        onclick="copyCode(this)">복사</button>
                             </div>
                         </td>
 
@@ -72,10 +172,10 @@
                             <div class="proj-meta">
                                 <span th:text="'고객사: ' + (p.clientName != null ? p.clientName : '-')">고객사: -</span>
                                 <span th:text="'영업: ' + (p.salesManager != null ? p.salesManager : '-')">영업: -</span>
+
                                 <span th:if="${p.contractAmount != null}"
                                       th:text="|금액: ${#numbers.formatInteger(p.contractAmount, 0, 'COMMA')}|">금액: 0</span>
-                                <span th:unless="${p.contractAmount != null}"
-                                      th:text="'금액: -'">금액: -</span>
+                                <span th:unless="${p.contractAmount != null}" th:text="'금액: -'">금액: -</span>
                             </div>
                         </td>
 
@@ -84,32 +184,61 @@
                         </td>
 
                         <td class="t-center">
-              <span class="dday-badge"
-                    th:if="${p.dday != null}"
-                    th:classappend="${p.dday < 0} ? ' over' : ''"
-                    th:text="${p.dday >= 0 ? ('D-' + p.dday) : ('D+' + (p.dday * -1))}">D-12</span>
+                            <span class="dday-badge"
+                                  th:if="${p.dday != null}"
+                                  th:classappend="${p.dday < 0} ? ' over' : ''"
+                                  th:text="${p.dday >= 0 ? ('D-' + p.dday) : ('D+' + (p.dday * -1))}">D-12</span>
                             <span th:if="${p.dday == null}">-</span>
                         </td>
-                        <td class="t-center" th:text="${p.regDate}">2024-05-02</td>
+
+                        <td class="t-center"
+                            th:text="${p.regDate != null ? p.regDate : '-'}">2024-05-02</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 페이징은 나중에 서버 붙일 때 교체 -->
-        <div class="pager">
-            <a class="page-btn" href="javascript:void(0)">«</a>
-            <a class="page-btn" href="javascript:void(0)">‹</a>
-            <a class="page-btn active" href="javascript:void(0)">1</a>
-            <a class="page-btn" href="javascript:void(0)">2</a>
-            <a class="page-btn" href="javascript:void(0)">3</a>
-            <a class="page-btn" href="javascript:void(0)">›</a>
-            <a class="page-btn" href="javascript:void(0)">»</a>
+        <!-- ✅ 페이징 (pageInfo 있을 때만 노출) -->
+        <div class="pager" th:if="${pageInfo != null}">
+            <!-- 처음 -->
+            <a class="page-btn"
+               th:classappend="${pageInfo.page == 1} ? ' disabled' : ''"
+               href="javascript:void(0)"
+               th:onclick="${pageInfo.page == 1} ? '' : 'goPage(1)'">«</a>
+
+            <!-- 이전 -->
+            <a class="page-btn"
+               th:classappend="${!pageInfo.hasPrev()} ? ' disabled' : ''"
+               href="javascript:void(0)"
+               th:onclick="${!pageInfo.hasPrev()} ? '' : 'goPage(' + (pageInfo.page - 1) + ')'">‹</a>
+
+            <!-- 번호들 (1~5, 6~10 같은 블록) -->
+            <a class="page-btn"
+               th:each="p : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage)}"
+               href="javascript:void(0)"
+               th:text="${p}"
+               th:classappend="${p == pageInfo.page} ? ' active' : ''"
+               th:onclick="'goPage(' + ${p} + ')'">1</a>
+
+            <!-- 다음 -->
+            <a class="page-btn"
+               th:classappend="${!pageInfo.hasNext()} ? ' disabled' : ''"
+               href="javascript:void(0)"
+               th:onclick="${!pageInfo.hasNext()} ? '' : 'goPage(' + (pageInfo.page + 1) + ')'">›</a>
+
+            <!-- 마지막 -->
+            <a class="page-btn"
+               th:classappend="${pageInfo.page == pageInfo.totalPages} ? ' disabled' : ''"
+               href="javascript:void(0)"
+               th:onclick="${pageInfo.page == pageInfo.totalPages} ? '' : 'goPage(' + pageInfo.totalPages + ')'">»</a>
         </div>
+
     </main>
 
+    <!-- FOOTER -->
     <div th:replace="~{comm/footer :: footer}"></div>
+
 </div>
 </body>
 </html>

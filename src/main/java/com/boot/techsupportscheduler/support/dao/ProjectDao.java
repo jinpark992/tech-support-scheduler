@@ -4,6 +4,7 @@ import com.boot.techsupportscheduler.support.vo.Project;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface ProjectDao {
@@ -17,4 +18,9 @@ public interface ProjectDao {
     void doDelete(Long projectId);
 
     void doUpdate(Project project);
+
+    // ✅ 페이징용 추가 2개
+    int countSearch(Map<String, Object> params);
+
+    List<Project> searchPaged(Map<String, Object> params);
 }

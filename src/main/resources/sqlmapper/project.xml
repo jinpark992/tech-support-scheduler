@@ -50,7 +50,104 @@
         AND deleted_yn = 'N'
     </select>
 
-<!--    &lt;!&ndash; 다음글 (id, title만 채워짐) &ndash;&gt;-->
+    <!-- ✅ 1) 검색 결과 전체 건수 -->
+    <select id="countSearch" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM project
+        WHERE deleted_yn = 'N'
+
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+
+        <if test="q != null and q != ''">
+            <choose>
+                <when test="field == 'projectCode'">
+                    AND project_code LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'projectName'">
+                    AND project_name LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'clientName'">
+                    AND client_name LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'salesManager'">
+                    AND sales_manager LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <otherwise>
+                    AND (
+                    project_code LIKE CONCAT('%', #{q}, '%')
+                    OR project_name LIKE CONCAT('%', #{q}, '%')
+                    OR client_name LIKE CONCAT('%', #{q}, '%')
+                    OR sales_manager LIKE CONCAT('%', #{q}, '%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+
+    <!-- ✅ 2) 현재 페이지 목록 -->
+    <select id="searchPaged" parameterType="map" resultType="com.boot.techsupportscheduler.support.vo.Project">
+        SELECT
+        project_id      AS projectId,
+        project_code    AS projectCode,
+        project_name    AS projectName,
+        client_name     AS clientName,
+        sales_manager   AS salesManager,
+        contract_amount AS contractAmount,
+        status          AS status,
+        reg_date        AS regDate,
+        end_date        AS endDate,
+        DATEDIFF(end_date, CURDATE()) AS dday,
+        created_at      AS createdAt,
+        updated_at      AS updatedAt,
+        deleted_yn      AS deletedYn,
+        deleted_at      AS deletedAt,
+        memo            AS memo
+        FROM project
+        WHERE deleted_yn = 'N'
+
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+
+        <if test="q != null and q != ''">
+            <choose>
+                <when test="field == 'projectCode'">
+                    AND project_code LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'projectName'">
+                    AND project_name LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'clientName'">
+                    AND client_name LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'salesManager'">
+                    AND sales_manager LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <otherwise>
+                    AND (
+                    project_code LIKE CONCAT('%', #{q}, '%')
+                    OR project_name LIKE CONCAT('%', #{q}, '%')
+                    OR client_name LIKE CONCAT('%', #{q}, '%')
+                    OR sales_manager LIKE CONCAT('%', #{q}, '%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+
+        <choose>
+            <when test="sort == 'old'"> ORDER BY project_id ASC </when>
+            <!-- 마감임박: NULL은 뒤로 보내고, 날짜 빠른 순 -->
+            <when test="sort == 'deadline'"> ORDER BY (end_date IS NULL) ASC, end_date ASC, project_id DESC </when>
+            <otherwise> ORDER BY project_id DESC </otherwise> <!-- new -->
+        </choose>
+
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+
+    <!--    &lt;!&ndash; 다음글 (id, title만 채워짐) &ndash;&gt;-->
 <!--    <select id="doNext" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">-->
 <!--        SELECT-->
 <!--        notice_id AS noticeId,-->

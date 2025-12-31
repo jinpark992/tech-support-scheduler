@@ -7,32 +7,43 @@
 
     <!-- 목록 -->
     <select id="doList" resultType="com.boot.techsupportscheduler.support.vo.Notice">
-        SELECT notice_id, is_top, title, writer, writer_user_id, content, views,
-        created_at, updated_at, deleted_yn, deleted_at
+        SELECT
+        notice_id      AS noticeId,
+        is_top         AS isTop,
+        title          AS title,
+        writer         AS writer,
+        writer_user_id AS writerUserId,
+        content        AS content,
+        views          AS views,
+        created_at     AS createdAt,
+        updated_at     AS updatedAt,
+        deleted_yn     AS deleteYn,
+        deleted_at     AS deletedAt
         FROM notice
         WHERE deleted_yn = 'N'
-        ORDER BY is_top DESC, notice_id ASC
+        ORDER BY is_top DESC, notice_id DESC
     </select>
-
 
     <!-- 상세 1건 -->
     <select id="doDetail" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">
         SELECT
-        notice_id  AS noticeId,
-        is_top     AS isTop,
-        title      AS title,
-        content    AS content,
-        views      AS views,
-        created_at AS createdAt,
-        updated_at AS updatedAt,
-        deleted_yn AS deleteYn,
-        deleted_at AS deletedAt
+        notice_id      AS noticeId,
+        is_top         AS isTop,
+        title          AS title,
+        writer         AS writer,
+        writer_user_id AS writerUserId,
+        content        AS content,
+        views          AS views,
+        created_at     AS createdAt,
+        updated_at     AS updatedAt,
+        deleted_yn     AS deleteYn,
+        deleted_at     AS deletedAt
         FROM notice
         WHERE notice_id = #{noticeId}
         AND deleted_yn = 'N'
     </select>
 
-    <!-- 이전글 (id, title만 채워짐) -->
+    <!-- 이전글 -->
     <select id="doPrev" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">
         SELECT
         notice_id AS noticeId,
@@ -44,7 +55,7 @@
         LIMIT 1
     </select>
 
-    <!-- 다음글 (id, title만 채워짐) -->
+    <!-- 다음글 -->
     <select id="doNext" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">
         SELECT
         notice_id AS noticeId,
@@ -54,6 +65,80 @@
         AND notice_id &gt; #{noticeId}
         ORDER BY notice_id ASC
         LIMIT 1
+    </select>
+
+    <!-- ✅ 1) COUNT -->
+    <select id="countSearch" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM notice
+        WHERE deleted_yn = 'N'
+
+        <if test="topOnly != null and topOnly != '' and topOnly == '1'">
+            AND is_top = 1
+        </if>
+
+        <if test="q != null and q != ''">
+            <choose>
+                <when test="field == 'title'">
+                    AND title LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'content'">
+                    AND content LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'writer'">
+                    AND writer LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <otherwise>
+                    AND (
+                    title LIKE CONCAT('%', #{q}, '%')
+                    OR content LIKE CONCAT('%', #{q}, '%')
+                    OR writer LIKE CONCAT('%', #{q}, '%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+
+    <!-- ✅ 2) 현재 페이지 목록 -->
+    <select id="searchPaged" parameterType="map" resultType="com.boot.techsupportscheduler.support.vo.Notice">
+        SELECT notice_id, is_top, title, writer, writer_user_id, content, views,
+        created_at, updated_at, deleted_yn, deleted_at
+        FROM notice
+        WHERE deleted_yn = 'N'
+
+        <if test="topOnly != null and topOnly != '' and topOnly == '1'">
+            AND is_top = 1
+        </if>
+
+        <if test="q != null and q != ''">
+            <choose>
+                <when test="field == 'title'">
+                    AND title LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'content'">
+                    AND content LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <when test="field == 'writer'">
+                    AND writer LIKE CONCAT('%', #{q}, '%')
+                </when>
+                <otherwise>
+                    AND (
+                    title LIKE CONCAT('%', #{q}, '%')
+                    OR content LIKE CONCAT('%', #{q}, '%')
+                    OR writer LIKE CONCAT('%', #{q}, '%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+
+        ORDER BY is_top DESC,
+        <choose>
+            <when test="sort == 'old'"> notice_id ASC </when>
+            <when test="sort == 'views'"> views DESC, notice_id DESC </when>
+            <otherwise> notice_id DESC </otherwise>
+        </choose>
+
+        LIMIT #{size} OFFSET #{offset}
     </select>
 
     <!-- 등록 -->
@@ -74,7 +159,7 @@
         AND deleted_yn = 'N'
     </update>
 
-    <!-- 삭제(소프트 삭제 추천) -->
+    <!-- 삭제 -->
     <update id="doDelete" parameterType="long">
         UPDATE notice
         SET deleted_yn = 'Y',
@@ -82,13 +167,10 @@
         WHERE notice_id = #{noticeId}
     </update>
 
-
-
-
+    <!-- 수정 -->
     <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Notice">
         UPDATE notice
-        SET
-        is_top = #{isTop},
+        SET is_top = #{isTop},
         title = #{title},
         content = #{content},
         updated_at = NOW()

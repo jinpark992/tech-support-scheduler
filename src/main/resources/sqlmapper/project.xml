@@ -3,12 +3,19 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+<!--
+  이 파일은 "project" 테이블을 조회/등록/수정/삭제하는 SQL들을 모아둔 곳.
+  namespace는 "이 SQL들이 누구 소속이냐"를 말해줌.
+  즉, ProjectDao 인터페이스랑 1:1로 연결되는 주소 같은 거.
+-->
 <mapper namespace="com.boot.techsupportscheduler.support.dao.ProjectDao">
 
-    <!-- 목록 -->
+    <!-- ========================= -->
+    <!-- 1) 목록: doList           -->
+    <!-- ========================= -->
     <select id="doList" resultType="com.boot.techsupportscheduler.support.vo.Project">
         SELECT
-        project_id      AS projectId,
+        project_id      AS projectId,        <!-- DB 컬럼(project_id)을 자바 필드(projectId)로 이름 맞춰줌 -->
         project_code    AS projectCode,
         project_name    AS projectName,
         client_name     AS clientName,
@@ -17,20 +24,30 @@
         status          AS status,
         reg_date        AS regDate,
         end_date        AS endDate,
+
         DATEDIFF(end_date, CURDATE()) AS dday,
+        <!--
+          dday = 마감일까지 며칠 남았는지 계산
+          - end_date가 오늘보다 미래면: 양수 (예: 5 => 5일 남음)
+          - end_date가 오늘이면: 0
+          - end_date가 과거면: 음수 (예: -2 => 2일 지남)
+          - end_date가 NULL이면: 결과도 NULL
+        -->
+
         created_at      AS createdAt,
         updated_at      AS updatedAt,
         deleted_yn      AS deletedYn,
         deleted_at      AS deletedAt,
         memo            AS memo
         FROM project
-        WHERE deleted_yn = 'N'
-        ORDER BY project_id DESC
+        WHERE deleted_yn = 'N'              <!-- 삭제 안 된 것만 보여줌(소프트 삭제 기준) -->
+        ORDER BY project_id DESC            <!-- 최신 등록이 위로 오게 (id 큰 게 최신) -->
     </select>
 
 
-
-    <!--    &lt;!&ndash; 상세 1건 &ndash;&gt;-->
+    <!-- ========================= -->
+    <!-- 2) 상세 1건: doDetail     -->
+    <!-- ========================= -->
     <select id="doDetail"
             parameterType="long"
             resultType="com.boot.techsupportscheduler.support.vo.Project">
@@ -48,32 +65,54 @@
         FROM project
         WHERE project_id = #{projectId}
         AND deleted_yn = 'N'
+        <!--
+          #{projectId} = "파라미터 바인딩"
+          쉽게 말해: "저기 구멍(#{})에 값 끼워넣기"
+
+          ⚠️ 주의 포인트(중요):
+          parameterType="long"인데 #{projectId}로 쓰려면
+          보통 DAO 메서드에서 @Param("projectId")를 붙였거나,
+          파라미터를 Map/VO로 넘겨야 자연스럽게 맞아.
+
+          예)
+          Project doDetail(@Param("projectId") Long projectId);
+        -->
     </select>
 
-    <!-- ✅ 1) 검색 결과 전체 건수 -->
+    <!-- ========================= -->
+    <!-- 3) 검색 결과 "총 개수" : countSearch -->
+    <!-- ========================= -->
     <select id="countSearch" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM project
         WHERE deleted_yn = 'N'
 
+        <!-- status 필터: status가 비어있지 않으면 status가 같은 것만 -->
         <if test="status != null and status != ''">
             AND status = #{status}
         </if>
 
+        <!-- q(검색어)가 있으면, field에 따라 검색 대상 컬럼을 바꿈 -->
         <if test="q != null and q != ''">
             <choose>
+                <!-- field가 projectCode면 project_code에서만 검색 -->
                 <when test="field == 'projectCode'">
                     AND project_code LIKE CONCAT('%', #{q}, '%')
                 </when>
+
                 <when test="field == 'projectName'">
                     AND project_name LIKE CONCAT('%', #{q}, '%')
                 </when>
+
                 <when test="field == 'clientName'">
                     AND client_name LIKE CONCAT('%', #{q}, '%')
                 </when>
+
                 <when test="field == 'salesManager'">
                     AND sales_manager LIKE CONCAT('%', #{q}, '%')
                 </when>
+
+                <!-- 그 외면(= 전체검색) 네 컬럼을 OR로 묶어서 다 찾아봄 -->
                 <otherwise>
                     AND (
                     project_code LIKE CONCAT('%', #{q}, '%')
@@ -84,9 +123,16 @@
                 </otherwise>
             </choose>
         </if>
+
+        <!--
+          이 쿼리는 "데이터가 몇 줄 나올지" 숫자만 세는 용도.
+          페이징할 때 totalCount 계산하려고 사용.
+        -->
     </select>
 
-    <!-- ✅ 2) 현재 페이지 목록 -->
+    <!-- ========================= -->
+    <!-- 4) 검색 + 페이징 목록: searchPaged -->
+    <!-- ========================= -->
     <select id="searchPaged" parameterType="map" resultType="com.boot.techsupportscheduler.support.vo.Project">
         SELECT
         project_id      AS projectId,
@@ -107,10 +153,12 @@
         FROM project
         WHERE deleted_yn = 'N'
 
+        <!-- status 조건 (있으면 적용) -->
         <if test="status != null and status != ''">
             AND status = #{status}
         </if>
 
+        <!-- 검색어 조건 (있으면 적용) -->
         <if test="q != null and q != ''">
             <choose>
                 <when test="field == 'projectCode'">
@@ -136,31 +184,42 @@
             </choose>
         </if>
 
+        <!-- 정렬(sort) 옵션 -->
         <choose>
-            <when test="sort == 'old'"> ORDER BY project_id ASC </when>
-            <!-- 마감임박: NULL은 뒤로 보내고, 날짜 빠른 순 -->
-            <when test="sort == 'deadline'"> ORDER BY (end_date IS NULL) ASC, end_date ASC, project_id DESC </when>
-            <otherwise> ORDER BY project_id DESC </otherwise> <!-- new -->
+            <when test="sort == 'old'">
+                ORDER BY project_id ASC
+                <!-- old: 오래된게 위로 -->
+            </when>
+
+            <when test="sort == 'deadline'">
+                ORDER BY (end_date IS NULL) ASC, end_date ASC, project_id DESC
+                <!--
+                  deadline: 마감임박순
+                  (end_date IS NULL) ASC  => NULL이면 1, 날짜 있으면 0 / 그래서 "날짜 있는 것"이 먼저 옴
+                  end_date ASC            => 날짜 빠른 게 위로 (더 급한 게 위)
+                  project_id DESC         => 같은 날짜면 최신이 위로
+                -->
+            </when>
+
+            <otherwise>
+                ORDER BY project_id DESC
+                <!-- 기본(new): 최신이 위로 -->
+            </otherwise>
         </choose>
 
         LIMIT #{size} OFFSET #{offset}
+        <!--
+          페이징 핵심:
+          - size: 한 페이지에 몇 개 보여줄지 (예: 10)
+          - offset: 어디서부터 가져올지 (예: 0, 10, 20 ...)
+          예) 2페이지(10개씩)면 offset=10
+        -->
     </select>
 
 
-    <!--    &lt;!&ndash; 다음글 (id, title만 채워짐) &ndash;&gt;-->
-<!--    <select id="doNext" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Notice">-->
-<!--        SELECT-->
-<!--        notice_id AS noticeId,-->
-<!--        title     AS title-->
-<!--        FROM notice-->
-<!--        WHERE deleted_yn = 'N'-->
-<!--        AND notice_id &gt; #{noticeId}-->
-<!--        ORDER BY notice_id ASC-->
-<!--        LIMIT 1-->
-<!--    </select>-->
-
-
-    <!-- 프로젝트 등록 -->
+    <!-- ========================= -->
+    <!-- 5) 프로젝트 등록: doInsert -->
+    <!-- ========================= -->
     <insert id="doInsert"
             parameterType="com.boot.techsupportscheduler.support.vo.Project"
             useGeneratedKeys="true"
@@ -176,14 +235,36 @@
         #{contractDate}, #{endDate}, NOW(), #{memo},
         NOW(), NOW(), 'N', NULL)
 
+        <!--
+          useGeneratedKeys="true"
+          => DB가 자동으로 만든 PK(project_id)를
+             자바 객체의 projectId 필드에 자동으로 꽂아줌.
+
+          keyProperty="projectId" (자바쪽 필드명)
+          keyColumn="project_id" (DB쪽 컬럼명)
+        -->
     </insert>
 
-    <!-- 삭제(소프트 삭제 추천) -->
+    <!-- ========================= -->
+    <!-- 6) 삭제: doDelete         -->
+    <!-- ========================= -->
     <update id="doDelete" parameterType="long">
         DELETE FROM project
         WHERE project_id = #{projectId}
+        <!--
+          ⚠️ 주석에 "소프트 삭제 추천"이라고 되어있는데,
+          실제 SQL은 "진짜 삭제(하드 삭제)"야. (행이 통째로 사라짐)
+
+          만약 소프트 삭제로 가려면 보통 이렇게 함:
+          UPDATE project
+          SET deleted_yn='Y', deleted_at=NOW()
+          WHERE project_id = #{projectId}
+        -->
     </update>
 
+    <!-- ========================= -->
+    <!-- 7) 수정: doUpdate         -->
+    <!-- ========================= -->
     <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Project">
         UPDATE project
         SET
@@ -199,37 +280,10 @@
         updated_at      = NOW()
         WHERE project_id = #{projectId}
         AND deleted_yn = 'N'
+        <!--
+          deleted_yn='N' 조건이 있어서:
+          이미 삭제 처리된 데이터는 수정 못하게 막음(안전장치)
+        -->
     </update>
-
-
-
-
-
-    <!--    &lt;!&ndash; 조회수 증가 &ndash;&gt;-->
-<!--    <update id="increaseViews" parameterType="long">-->
-<!--        UPDATE notice-->
-<!--        SET views = views + 1-->
-<!--        WHERE notice_id = #{noticeId}-->
-<!--        AND deleted_yn = 'N'-->
-<!--    </update>-->
-
-<!--    &lt;!&ndash; 삭제(소프트 삭제 추천) &ndash;&gt;-->
-<!--    <update id="doDelete" parameterType="long">-->
-<!--        UPDATE notice-->
-<!--        SET deleted_yn = 'Y',-->
-<!--        deleted_at = NOW()-->
-<!--        WHERE notice_id = #{noticeId}-->
-<!--    </update>-->
-
-<!--    <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Notice">-->
-<!--        UPDATE notice-->
-<!--        SET-->
-<!--        is_top = #{isTop},-->
-<!--        title = #{title},-->
-<!--        content = #{content},-->
-<!--        updated_at = NOW()-->
-<!--        WHERE notice_id = #{noticeId}-->
-<!--        AND deleted_yn = 'N'-->
-<!--    </update>-->
 
 </mapper>

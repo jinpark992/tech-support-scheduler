@@ -2,6 +2,7 @@ package com.boot.techsupportscheduler.support.dao;
 
 import com.boot.techsupportscheduler.support.vo.Project;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;   // ✅ 추가
 
 import java.util.List;
 import java.util.Map;
@@ -13,14 +14,12 @@ public interface ProjectDao {
 
     int doInsert(Project project);
 
-    Project doDetail(Long projectId);
+    Project doDetail(@Param("projectId") Long projectId); // ✅ 수정
 
-    void doDelete(Long projectId);
+    void doDelete(@Param("projectId") Long projectId);    // ✅ 수정
 
     void doUpdate(Project project);
 
-    // ✅ 페이징용 추가 2개
     int countSearch(Map<String, Object> params);
-
     List<Project> searchPaged(Map<String, Object> params);
 }

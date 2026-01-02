@@ -71,7 +71,15 @@
                 <div class="hint">프로젝트 코드는 기술지원 등록 시 프로젝트 선택/검색용으로 사용됩니다.</div>
             </div>
             <div class="page-actions">
-                <a class="btn btn-primary" th:href="@{/support/project/new}">프로젝트 등록</a>
+                <!-- ✅ ADMIN/SALES만 이동 -->
+                <a class="btn btn-primary"
+                   th:if="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.role == 'ROLE_SALES')}"
+                   th:href="@{/support/project/new}">프로젝트 등록</a>
+
+                <!-- ✅ 권한 없으면 토스트만 -->
+                <button class="btn btn-primary" type="button"
+                        th:unless="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.role == 'ROLE_SALES')}"
+                        onclick="toast('프로젝트 등록은 ADMIN/SALES만 가능 합니다')">프로젝트 등록</button>
             </div>
         </div>
 

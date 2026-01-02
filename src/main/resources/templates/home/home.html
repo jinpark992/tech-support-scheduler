@@ -50,8 +50,22 @@
 
             <div class="board-head">
                 <h1 class="board-title">공지사항</h1>
-                <a class="btn btn-primary" th:href="@{/support/notice/new}">공지 등록</a>
-            </div>
+                <div class="page-actions">
+                    <!-- ✅ ADMIN만 이동 -->
+                    <!-- ✅ ADMIN이면 링크 이동 -->
+                    <a class="btn btn-primary"
+                       th:if="${session.LOGIN_USER != null and session.LOGIN_USER.role == 'ROLE_ADMIN'}"
+                       th:href="@{/support/notice/new}">공지 등록</a>
+
+                    <!-- ✅ ADMIN 아니면 토스트만 -->
+                    <a class="btn btn-primary"
+                       th:unless="${session.LOGIN_USER != null and session.LOGIN_USER.role == 'ROLE_ADMIN'}"
+                       href="javascript:void(0);"
+                       onclick="toast('공지 등록은 ADMIN만 가능해'); return false;">공지 등록</a>
+
+
+                </div>
+                </div>
 
             <!-- ✅ 검색 + 정렬 -->
             <div class="search-card">

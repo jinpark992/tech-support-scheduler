@@ -2,6 +2,7 @@ package com.boot.techsupportscheduler.support.dao;
 
 import com.boot.techsupportscheduler.support.vo.Notice;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;   // ✅ 추가
 
 import java.util.List;
 import java.util.Map;
@@ -11,27 +12,23 @@ public interface NoticeDao {
 
     List<Notice> doList();
 
-    int doDelete(Long noticeId);
+    int doDelete(@Param("noticeId") Long noticeId);      // ✅ 수정
 
     int doInsert(Notice notice);
 
-    Notice doDetail(Long noticeId);
+    Notice doDetail(@Param("noticeId") Long noticeId);   // ✅ 수정
 
-    void increaseViews(Long noticeId);
+    void increaseViews(@Param("noticeId") Long noticeId);// ✅ 수정
 
-    Notice doPrev(Long noticeId);
+    Notice doPrev(@Param("noticeId") Long noticeId);     // ✅ 수정
 
-    Notice doNext(Long noticeId);
+    Notice doNext(@Param("noticeId") Long noticeId);     // ✅ 수정
 
     int doUpdate(Notice notice);
 
-    // ✅ 페이징/검색
     List<Notice> doSearch(Map<String, Object> params);
-
-    // ✅ 페이징 계산용(전체 건수)
     int doSearchCount(Map<String, Object> params);
 
     int countSearch(Map<String, Object> p);
-
     List<Notice> searchPaged(Map<String, Object> p);
 }

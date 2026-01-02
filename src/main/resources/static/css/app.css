@@ -795,3 +795,39 @@ a { color: inherit; }
     .form-grid{ grid-template-columns: 1fr; }
 }
 
+.top-right,
+.top-right a,
+.top-right span {
+    color: #fff;
+}
+
+.top-right a {
+    text-decoration: none;
+}
+
+.top-right a:hover {
+    text-decoration: underline;
+}
+
+
+/* ✅ 토스트(알림바) */
+.toast{
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+    pointer-events: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    transition: .2s;
+    z-index: 9999;
+}
+.toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+

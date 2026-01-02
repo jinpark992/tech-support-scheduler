@@ -59,7 +59,15 @@
         <div class="page-head">
             <h1 class="page-title">기술지원</h1>
             <div class="page-actions">
-                <a class="btn btn-primary" th:href="@{/support/support/new}">기술지원 등록</a>
+                <!-- ✅ ADMIN/SUPPORT만 이동 -->
+                <a class="btn btn-primary"
+                   th:if="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.role == 'ROLE_SUPPORT')}"
+                   th:href="@{/support/support/new}">기술지원 등록</a>
+
+                <!-- ✅ 권한 없으면 토스트만 -->
+                <button class="btn btn-primary" type="button"
+                        th:unless="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.role == 'ROLE_SUPPORT')}"
+                        onclick="toast('기술지원 등록은 ADMIN/SUPPORT만 가능합니다')">기술지원 등록</button>
             </div>
         </div>
 

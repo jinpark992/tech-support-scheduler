@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.techsupportscheduler.support.dao.UserDao">
+
+    <!-- ✅ 중복 체크용 조회 -->
+    <select id="findByLoginId" resultType="com.boot.techsupportscheduler.support.vo.User">
+        SELECT
+        user_id       AS userId,
+        login_id      AS loginId,
+        password_hash AS passwordHash,
+        name          AS name,
+        role          AS role
+        FROM users
+        WHERE login_id = #{loginId}
+        LIMIT 1
+    </select>
+
+    <!-- ✅ 회원가입 INSERT -->
+    <insert id="insertUser"
+            parameterType="com.boot.techsupportscheduler.support.vo.User"
+            useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO users (login_id, password_hash, name, role, created_at, deleted_yn)
+        VALUES (#{loginId}, #{passwordHash}, #{name}, #{role}, NOW(), 'N')
+    </insert>
+
+</mapper>

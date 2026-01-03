@@ -38,7 +38,7 @@ public class LoginCon {
         log.info("LOGIN RESULT success={}", (su != null));
 
         if (su == null) {
-            model.addAttribute("error", "아이디 또는 비밀번호가 틀렸어.");
+            model.addAttribute("error", "아이디 또는 비밀번호가 틀렸습니다.");
             return "auth/login";
         }
 

@@ -11,14 +11,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-
         registry.addInterceptor(new LoginInterceptor())
-                .addPathPatterns("/support/**"); // ✅ support 아래는 로그인 필수
+                .addPathPatterns("/support/**");
 
-        // ✅ POST(등록/수정/삭제)만 역할로 제한, GET은 모두 통과
         registry.addInterceptor(new RoleActionInterceptor())
                 .addPathPatterns("/support/**");
     }
-
-
 }
+

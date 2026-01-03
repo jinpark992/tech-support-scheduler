@@ -43,4 +43,14 @@ public class PageInfo {
     public boolean hasNext() {
         return page < totalPages;
     }
+
+    // PageInfo.java 내부에 추가
+    public int prevPage() {
+        return (page > 1) ? (page - 1) : 1;
+    }
+
+    public int nextPage() {
+        return (page < totalPages) ? (page + 1) : totalPages;
+    }
+
 }

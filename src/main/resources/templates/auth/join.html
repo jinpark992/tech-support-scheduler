@@ -16,11 +16,9 @@
     <div class="auth-card">
       <h1 class="auth-title">회원가입</h1>
 
-      <!-- ✅ 에러 메시지 표시 -->
       <div th:if="${error}" class="form-error" style="color:red; margin-bottom:10px;"
            th:text="${error}"></div>
 
-      <!-- ✅ 파라미터 이름 통일: loginId / password / name / role -->
       <form method="post" th:action="@{/join}" class="auth-form">
 
         <div class="form-row">
@@ -48,13 +46,14 @@
         <div class="form-row">
           <label>권한</label>
 
-          <!-- ✅ 값(value)은 ROLE_*로 저장 (인터셉터와 통일) -->
-          <!-- ✅ roles 모델이 없어도 동작하도록 기본 option 박아둠 -->
+          <!-- ✅ roles 모델 기반 렌더링 + 선택값(selectedRole) 유지 -->
           <select name="role" required>
             <option value="">선택</option>
-            <option value="ROLE_ADMIN">ADMIN</option>
-            <option value="ROLE_SALES">SALES</option>
-            <option value="ROLE_SUPPORT">SUPPORT</option>
+            <option th:each="r : ${roles}"
+                    th:value="${r}"
+                    th:text="${#strings.replace(r, 'ROLE_', '')}"
+                    th:selected="${r == selectedRole}">
+            </option>
           </select>
 
           <small class="form-help">테스트용(운영에서는 보통 role 선택 막음)</small>

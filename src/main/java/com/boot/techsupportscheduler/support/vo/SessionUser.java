@@ -6,5 +6,5 @@ import lombok.Data;
 public class SessionUser {
     private final Long userId;
     private final String loginId;
-    private final String role; // ROLE_ADMIN, ROLE_SALES, ROLE_SUPPORT
+    private final String role; // ROLE_ADMIN, ROLE_SALES, ROLE_SUPPORT의 데이터값
 }

@@ -18,13 +18,17 @@ public class RoleActionInterceptor implements HandlerInterceptor {
         // ✅ 조회(GET)는 전부 OK
         if ("GET".equalsIgnoreCase(method)) return true;
 
-        // ✅ POST만 권한 체크
+        // ✅ GET 외(POST/PUT/DELETE 등) 권한 체크
         HttpSession session = req.getSession(false);
         SessionUser user = (session == null) ? null : (SessionUser) session.getAttribute("LOGIN_USER");
         if (user == null) {
             res.sendRedirect("/login?redirect=" + uri);
             return false;
         }
+
+// ✅ 내정보/비번변경은 전 역할 허용
+        if (uri.startsWith("/support/user/")) return true;
+
 
         String role = user.getRole();
 

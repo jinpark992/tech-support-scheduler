@@ -17,11 +17,9 @@
             <span th:if="${session.LOGIN_USER != null}"
                   th:text="${session.LOGIN_USER.loginId}"></span>
 
-            <!-- 비로그인 -->
             <a th:if="${session.LOGIN_USER == null}" th:href="@{/login}">로그인</a>
             <a th:if="${session.LOGIN_USER == null}" th:href="@{/join}">회원가입</a>
-
-            <!-- 로그인 -->
+            <a th:if="${session.LOGIN_USER != null}" th:href="@{/support/user/edit}">내정보</a>
             <a th:if="${session.LOGIN_USER != null}" th:href="@{/logout}">로그아웃</a>
         </div>
     </div>

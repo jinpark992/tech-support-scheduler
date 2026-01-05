@@ -5,7 +5,7 @@
 
 <mapper namespace="com.boot.techsupportscheduler.support.dao.UserDao">
 
-    <!-- ✅ 중복 체크용 조회 -->
+    <!-- ✅ 중복 체크/로그인 조회 -->
     <select id="findByLoginId" resultType="com.boot.techsupportscheduler.support.vo.User">
         SELECT
         user_id       AS userId,
@@ -15,6 +15,7 @@
         role          AS role
         FROM users
         WHERE login_id = #{loginId}
+        AND deleted_yn = 'N'
         LIMIT 1
     </select>
 
@@ -25,5 +26,35 @@
         INSERT INTO users (login_id, password_hash, name, role, created_at, deleted_yn)
         VALUES (#{loginId}, #{passwordHash}, #{name}, #{role}, NOW(), 'N')
     </insert>
+
+    <!-- ✅ user_id로 내정보 조회 -->
+    <select id="findByUserId" resultType="com.boot.techsupportscheduler.support.vo.User">
+        SELECT
+        user_id       AS userId,
+        login_id      AS loginId,
+        password_hash AS passwordHash,
+        name          AS name,
+        role          AS role
+        FROM users
+        WHERE user_id = #{userId}
+        AND deleted_yn = 'N'
+        LIMIT 1
+    </select>
+
+    <!-- ✅ 이름 수정 -->
+    <update id="updateName">
+        UPDATE users
+        SET name = #{name}
+        WHERE user_id = #{userId}
+        AND deleted_yn = 'N'
+    </update>
+
+    <!-- ✅ 비밀번호 변경(해시만 저장) -->
+    <update id="updatePasswordHash">
+        UPDATE users
+        SET password_hash = #{passwordHash}
+        WHERE user_id = #{userId}
+        AND deleted_yn = 'N'
+    </update>
 
 </mapper>

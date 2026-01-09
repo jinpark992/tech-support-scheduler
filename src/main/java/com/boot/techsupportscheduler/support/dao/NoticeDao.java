@@ -1,6 +1,7 @@
 package com.boot.techsupportscheduler.support.dao;
 
 import com.boot.techsupportscheduler.support.vo.Notice;
+import com.boot.techsupportscheduler.support.vo.NoticeComment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;   // ✅ 추가
 
@@ -31,4 +32,12 @@ public interface NoticeDao {
 
     int countSearch(Map<String, Object> p);
     List<Notice> searchPaged(Map<String, Object> p);
+
+    List<NoticeComment> selectCommentList(Long noticeId);
+
+    void insertComment(NoticeComment comment);
+
+    void increaseLikeCount(Long commentId);
+
+    int selectLikeCount(Long commentId);
 }

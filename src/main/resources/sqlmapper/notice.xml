@@ -178,4 +178,37 @@
         AND deleted_yn = 'N'
     </update>
 
+    <select id="selectCommentList" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.NoticeComment">
+        SELECT
+        comment_id   AS commentId,
+        notice_id    AS noticeId,
+        writer       AS writer,
+        content      AS content,
+        like_count   AS likeCount,
+        created_at   AS createdAt
+        FROM notice_comment
+        WHERE notice_id = #{noticeId}
+        AND deleted_yn = 'N'
+        ORDER BY comment_id ASC
+    </select>
+
+    <insert id="insertComment" parameterType="com.boot.techsupportscheduler.support.vo.NoticeComment">
+        INSERT INTO notice_comment
+        (notice_id, writer, content, like_count, created_at, deleted_yn)
+        VALUES
+        (#{noticeId}, #{writer}, #{content}, 0, NOW(), 'N')
+    </insert>
+
+    <update id="increaseLikeCount" parameterType="long">
+        UPDATE notice_comment
+        SET like_count = like_count + 1
+        WHERE comment_id = #{commentId}
+    </update>
+
+    <select id="selectLikeCount" parameterType="long" resultType="int">
+        SELECT like_count
+        FROM notice_comment
+        WHERE comment_id = #{commentId}
+    </select>
+
 </mapper>

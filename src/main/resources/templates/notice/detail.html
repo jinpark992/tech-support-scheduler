@@ -70,6 +70,8 @@
                 <p class="detail-content" th:text="${notice.content}">내용</p>
             </div>
 
+
+
             <!-- 이전글/다음글 -->
             <div class="detail-nav" style="margin-top:22px; display:grid; gap:8px;">
                 <div>
@@ -86,6 +88,66 @@
                        th:href="@{/support/notice/detail(noticeId=${nextNotice.noticeId})}"
                        th:text="${nextNotice.title}">다음글</a>
                 </div>
+
+                <div class="card mt-5 mb-5">
+                    <div class="card-header fw-bold">
+                        댓글 <span th:text="${#lists.size(comments)}">0</span>개
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item text-center text-muted" th:if="${#lists.isEmpty(comments)}">
+                            등록된 댓글이 없습니다.
+                        </li>
+
+                        <!--댓글 -->
+                        <li class="list-group-item" th:each="c : ${comments}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong th:text="${c.writer}">작성자</strong>
+                                    <small class="text-muted ms-2" th:text="${c.createdAt}">날짜</small>
+                                    <div class="mt-1" th:text="${c.content}">댓글 내용</div>
+                                </div>
+
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        th:onclick="|clickLike(${c.commentId})|">
+                                    <span>❤️</span>
+                                    <span th:id="|like-count-${c.commentId}|" th:text="${c.likeCount}">0</span>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="card-body">
+                        <form action="/support/notice/comment/add" method="post">
+                            <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+                            <input type="hidden" name="writer"
+                                   th:value="${session.LOGIN_USER != null ? session.LOGIN_USER.loginId : 'guest'}">
+
+                            <div class="input-group">
+                                <textarea class="form-control" name="content" rows="2" placeholder="댓글을 입력하세요..." required></textarea>
+                                <button class="btn btn-dark" type="submit">등록</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script src="/js/jquery-3.7.1.js"></script>
+                <script>
+                    function clickLike(commentId) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/support/notice/comment/like",
+                            data: { "commentId": commentId },
+                            success: function(newCount) {
+                                // 성공하면 해당 댓글의 숫자만 갱신!
+                                $("#like-count-" + commentId).text(newCount);
+                            },
+                            error: function() {
+                                alert("좋아요 처리에 실패했습니다.");
+                            }
+                        });
+                    }
+                </script>
             </div>
 
         </section>

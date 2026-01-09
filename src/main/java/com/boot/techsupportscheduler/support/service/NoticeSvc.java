@@ -2,6 +2,7 @@ package com.boot.techsupportscheduler.support.service;
 
 import com.boot.techsupportscheduler.support.dao.NoticeDao;
 import com.boot.techsupportscheduler.support.vo.Notice;
+import com.boot.techsupportscheduler.support.vo.NoticeComment;
 import com.boot.techsupportscheduler.support.vo.NoticePageResult;
 import com.boot.techsupportscheduler.support.vo.PageInfo;
 import lombok.extern.log4j.Log4j2;
@@ -79,5 +80,20 @@ public class NoticeSvc {
 
         // ✅ 5) 화면으로 보낼 “결과 박스” 리턴
         return new NoticePageResult(notices, pageInfo, q);
+    }
+
+    public List<NoticeComment> getCommentList(Long noticeId) {
+        return noticeDao.selectCommentList(noticeId);
+    }
+
+    // 2. 댓글 등록
+    public void addComment(NoticeComment comment) {
+        noticeDao.insertComment(comment);
+    }
+
+    // 3. 좋아요 처리 (증가시키고 -> 최신값 가져오기)
+    public int likeComment(Long commentId) {
+        noticeDao.increaseLikeCount(commentId); // 카운트 +1
+        return noticeDao.selectLikeCount(commentId); // 증가된 값 조회
     }
 }

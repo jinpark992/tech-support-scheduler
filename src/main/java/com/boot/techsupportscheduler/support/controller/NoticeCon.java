@@ -2,12 +2,15 @@ package com.boot.techsupportscheduler.support.controller;
 
 import com.boot.techsupportscheduler.support.service.NoticeSvc;
 import com.boot.techsupportscheduler.support.vo.Notice;
+import com.boot.techsupportscheduler.support.vo.NoticeComment;
 import com.boot.techsupportscheduler.support.vo.NoticePageResult;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/support")
@@ -75,12 +78,23 @@ public class NoticeCon {
         Notice prev = noticeSvc.doPrev(noticeId);
         Notice next = noticeSvc.doNext(noticeId);
 
+        // ⭐ [추가] 댓글 목록 가져오기
+        List<NoticeComment> comments = noticeSvc.getCommentList(noticeId);
+
         model.addAttribute("activeMenu", "home");
         model.addAttribute("notice", notice);
         model.addAttribute("prevNotice", prev);
         model.addAttribute("nextNotice", next);
+        model.addAttribute("comments", comments); // 화면으로 전달!
 
         return "notice/detail";
+    }
+
+    // 2. [추가] 댓글 등록 (저장하고 다시 상세화면으로)
+    @PostMapping("/notice/comment/add")
+    public String addComment(@ModelAttribute NoticeComment comment) {
+        noticeSvc.addComment(comment);
+        return "redirect:/support/notice/detail?noticeId=" + comment.getNoticeId();
     }
 
     // ✅ 수정 폼
@@ -126,5 +140,13 @@ public class NoticeCon {
         model.addAttribute("sort", sort);
 
         return "home/home";
+    }
+
+    // 3. [추가] 좋아요 처리 (AJAX용 - 숫자만 리턴)
+    @ResponseBody
+    @PostMapping("/notice/comment/like")
+    public String likeComment(@RequestParam("commentId") Long commentId) {
+        int newCount = noticeSvc.likeComment(commentId);
+        return String.valueOf(newCount); // "5" 처럼 숫자만 문자로 보냄
     }
 }

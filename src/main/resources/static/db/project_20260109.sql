@@ -45,7 +45,7 @@ INSERT IGNORE INTO `notice` (`notice_id`, `is_top`, `title`, `writer`, `content`
 	(23, 0, '3', 'admin', '3', NULL, 0, '2025-12-23 12:52:10', '2025-12-23 12:52:44', 'Y', '2025-12-23 12:52:44'),
 	(24, 0, '4', 'admin', '4', NULL, 0, '2025-12-23 12:52:15', '2025-12-23 12:52:44', 'Y', '2025-12-23 12:52:44'),
 	(25, 1, '1', 'admin', '1', NULL, 0, '2025-12-23 12:52:28', '2025-12-23 12:52:40', 'Y', '2025-12-23 12:52:40'),
-	(26, 1, '상단 고정', 'admin', '테스트 중입니다 수정', NULL, 54, '2025-12-23 12:52:54', '2026-01-03 19:59:39', 'N', NULL),
+	(26, 1, '상단 고정', 'admin', '테스트 중입니다 수정', NULL, 58, '2025-12-23 12:52:54', '2026-01-09 13:27:54', 'N', NULL),
 	(27, 0, '일반1 수정', 'admin', '일반1 수정', NULL, 20, '2025-12-23 12:53:01', '2026-01-02 12:44:27', 'Y', '2026-01-02 12:44:27'),
 	(28, 0, '일반2 수정', 'admin', '일반2 수정', NULL, 8, '2025-12-23 12:53:06', '2026-01-02 12:44:27', 'Y', '2026-01-02 12:44:27'),
 	(29, 0, '일반3', 'admin', '일반3', NULL, 1, '2025-12-23 12:53:15', '2026-01-02 12:44:27', 'Y', '2026-01-02 12:44:27'),
@@ -65,8 +65,8 @@ INSERT IGNORE INTO `notice` (`notice_id`, `is_top`, `title`, `writer`, `content`
 	(43, 0, '5', 'admin', '5', NULL, 0, '2025-12-31 12:10:38', '2026-01-02 12:44:25', 'Y', '2026-01-02 12:44:25'),
 	(44, 0, '6', 'admin', '6', NULL, 0, '2025-12-31 12:10:45', '2026-01-02 12:44:25', 'Y', '2026-01-02 12:44:25'),
 	(45, 0, 'ㄷㅂㄷ', 'admin', 'ㅂㅈㄷㅂㅈㄷ', NULL, 0, '2025-12-31 12:37:30', '2026-01-02 12:44:24', 'Y', '2026-01-02 12:44:24'),
-	(46, 1, '[필독] 1월 운영 공지', 'admin', '1월 운영/점검 일정 안내', 1, 13, '2026-01-02 12:57:04', '2026-01-05 18:41:55', 'N', NULL),
-	(47, 1, '[필독] 장애 대응 프로세스', 'admin', '장애 발생 시 보고/조치 흐름 정리', 1, 39, '2026-01-02 12:57:04', '2026-01-05 18:41:54', 'N', NULL),
+	(46, 1, '[필독] 1월 운영 공지', 'admin', '1월 운영/점검 일정 안내', 1, 34, '2026-01-02 12:57:04', '2026-01-09 13:36:00', 'N', NULL),
+	(47, 1, '[필독] 장애 대응 프로세스', 'admin', '장애 발생 시 보고/조치 흐름 정리', 1, 88, '2026-01-02 12:57:04', '2026-01-09 13:27:11', 'Y', '2026-01-09 13:27:11'),
 	(48, 0, '[공지] 신규 프로젝트 등록 규칙', 'admin', '프로젝트 코드/상태 입력 규칙 안내', 1, 5, '2026-01-02 12:57:04', '2026-01-03 20:41:31', 'Y', '2026-01-03 20:41:31'),
 	(49, 0, '[공지] 정기점검 체크리스트', 'admin', '정기점검 항목 공유', 1, 9, '2026-01-02 12:57:04', NULL, 'N', NULL),
 	(50, 0, '[공지] 배포 시간대 가이드', 'admin', '배포 권장 시간대 및 사전 공지', 1, 14, '2026-01-02 12:57:04', NULL, 'N', NULL),
@@ -84,7 +84,48 @@ INSERT IGNORE INTO `notice` (`notice_id`, `is_top`, `title`, `writer`, `content`
 	(62, 0, '[공지] UI 개선 사항', 'admin', '화면 개선 내역 정리', 1, 13, '2026-01-02 12:57:04', NULL, 'N', NULL),
 	(63, 0, '[공지] 데이터 정합성 체크', 'admin', '중복/누락 점검 안내', 1, 4, '2026-01-02 12:57:04', NULL, 'N', NULL),
 	(64, 0, '[공지] 문의 채널 안내', 'admin', '문의 채널/담당자 안내', 1, 2, '2026-01-02 12:57:04', NULL, 'N', NULL),
-	(65, 0, '[공지] 휴일 운영', 'admin', '휴일 대응 방식 안내', 1, 17, '2026-01-02 12:57:04', NULL, 'N', NULL);
+	(65, 0, '[공지] 휴일 운영', 'admin', '휴일 대응 방식 안내', 1, 18, '2026-01-02 12:57:04', '2026-01-09 13:27:34', 'N', NULL);
+
+-- 테이블 tech_support_scheduler.notice_comment 구조 내보내기
+CREATE TABLE IF NOT EXISTS `notice_comment` (
+  `comment_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `notice_id` bigint(20) NOT NULL,
+  `writer` varchar(50) NOT NULL,
+  `content` text NOT NULL,
+  `like_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `deleted_yn` char(1) NOT NULL DEFAULT 'N',
+  PRIMARY KEY (`comment_id`),
+  KEY `fk_comment_notice` (`notice_id`),
+  CONSTRAINT `fk_comment_notice` FOREIGN KEY (`notice_id`) REFERENCES `notice` (`notice_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 테이블 데이터 tech_support_scheduler.notice_comment:~8 rows (대략적) 내보내기
+INSERT IGNORE INTO `notice_comment` (`comment_id`, `notice_id`, `writer`, `content`, `like_count`, `created_at`, `deleted_yn`) VALUES
+	(1, 47, 'admin', 'ㅋㅋ', 10, '2026-01-08 13:35:24', 'N'),
+	(2, 47, 'admin', '진수', 1, '2026-01-08 13:49:56', 'N'),
+	(3, 47, 'test4', 'gd', 1, '2026-01-09 13:24:16', 'N'),
+	(4, 47, 'test4', 'ㅎㅇ', 0, '2026-01-09 13:24:19', 'N'),
+	(5, 47, 'test4', 'ttt', 0, '2026-01-09 13:27:05', 'N'),
+	(6, 47, 'test4', 'ㅎㅇㅎㅇㅎㅇ', 0, '2026-01-09 13:27:08', 'N'),
+	(7, 46, 'admin', 'ㅎㅇㅎㅇ', 3, '2026-01-09 13:27:58', 'N'),
+	(8, 46, 'sales', 'ㅎㅇㅎㅇ', 2, '2026-01-09 13:28:08', 'N');
+
+-- 테이블 tech_support_scheduler.notice_comment_like 구조 내보내기
+CREATE TABLE IF NOT EXISTS `notice_comment_like` (
+  `like_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'PK',
+  `comment_id` bigint(20) NOT NULL COMMENT '좋아요 누른 댓글 번호',
+  `user_id` varchar(50) NOT NULL COMMENT '누가 눌렀니? (로그인 ID)',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`like_id`),
+  UNIQUE KEY `uk_comment_user` (`comment_id`,`user_id`),
+  CONSTRAINT `fk_like_comment` FOREIGN KEY (`comment_id`) REFERENCES `notice_comment` (`comment_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 테이블 데이터 tech_support_scheduler.notice_comment_like:~2 rows (대략적) 내보내기
+INSERT IGNORE INTO `notice_comment_like` (`like_id`, `comment_id`, `user_id`, `created_at`) VALUES
+	(139, 7, 'admin', '2026-01-09 13:36:03'),
+	(140, 8, 'admin', '2026-01-09 13:36:03');
 
 -- 테이블 tech_support_scheduler.notice_file 구조 내보내기
 CREATE TABLE IF NOT EXISTS `notice_file` (
@@ -223,17 +264,13 @@ CREATE TABLE IF NOT EXISTS `users` (
   `deleted_yn` char(1) NOT NULL DEFAULT 'N',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `login_id` (`login_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 테이블 데이터 tech_support_scheduler.users:~7 rows (대략적) 내보내기
+-- 테이블 데이터 tech_support_scheduler.users:~3 rows (대략적) 내보내기
 INSERT IGNORE INTO `users` (`user_id`, `login_id`, `password_hash`, `name`, `role`, `created_at`, `updated_at`, `deleted_yn`) VALUES
 	(1, 'admin', '$2a$10$SjfMCO2hJLJVJvxM2xZl8u9X.jl9Lhuldo0RpjELoi3R307g1E7DO', '관리자', 'ROLE_ADMIN', '2025-12-23 11:41:25', '2026-01-05 11:18:40', 'N'),
 	(6, 'sales', '$2a$10$H0OvM3UnvkYAabydXYIslur9uYC9iWHl9JqWalowKIt2yGFgpHTWi', '영업', 'ROLE_SALES', '2026-01-02 13:34:05', NULL, 'N'),
-	(7, 'support', '$2a$10$H0OvM3UnvkYAabydXYIslur9uYC9iWHl9JqWalowKIt2yGFgpHTWi', '기술지원', 'ROLE_SUPPORT', '2026-01-02 13:34:05', NULL, 'N'),
-	(11, 'test', '$2a$10$/SX4ek7vx32U0jNl6jUSH.HCZkQTH4kjOUNW2LuSzfETfuKPU67.K', '박진수', 'ROLE_ADMIN', '2026-01-03 20:25:57', '2026-01-05 12:13:44', 'N'),
-	(12, 'dacsar', '$2a$10$BJkBHju0rn0ZIN80iwi1qOgxIK5B8ehWUszph1FkvdKbgYdVY5Zmy', '박진수', 'ROLE_SUPPORT', '2026-01-05 10:03:15', NULL, 'N'),
-	(13, 'wlstn127', '$2a$10$8qLF5BEsqxHA/VCOc5GKoubPUCZvBMLssbralaTlLOnxh.KPqhFN6', '홍길동', 'ROLE_ADMIN', '2026-01-05 10:27:07', NULL, 'N'),
-	(14, 'test2', '$2a$10$Y3xcOPWTxTjBO2xMZUc2o.UXKoGJ8BXf49adU/z9qTnGuLgIc9UWi', 'test', 'ROLE_ADMIN', '2026-01-05 10:32:24', NULL, 'N');
+	(7, 'support', '$2a$10$H0OvM3UnvkYAabydXYIslur9uYC9iWHl9JqWalowKIt2yGFgpHTWi', '기술지원', 'ROLE_SUPPORT', '2026-01-02 13:34:05', NULL, 'N');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

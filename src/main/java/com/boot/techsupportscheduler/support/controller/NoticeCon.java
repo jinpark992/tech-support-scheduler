@@ -4,13 +4,17 @@ import com.boot.techsupportscheduler.support.service.NoticeSvc;
 import com.boot.techsupportscheduler.support.vo.Notice;
 import com.boot.techsupportscheduler.support.vo.NoticeComment;
 import com.boot.techsupportscheduler.support.vo.NoticePageResult;
+import com.boot.techsupportscheduler.support.vo.SessionUser;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/support")
@@ -142,11 +146,36 @@ public class NoticeCon {
         return "home/home";
     }
 
-    // 3. [추가] 좋아요 처리 (AJAX용 - 숫자만 리턴)
+    // ==================================================================
+    // [AJAX] 좋아요 토글 (누르면 ON, 또 누르면 OFF)
+    // 리턴값 예시: { "result": "LIKE", "count": 5 }
+    // ==================================================================
     @ResponseBody
     @PostMapping("/notice/comment/like")
-    public String likeComment(@RequestParam("commentId") Long commentId) {
-        int newCount = noticeSvc.likeComment(commentId);
-        return String.valueOf(newCount); // "5" 처럼 숫자만 문자로 보냄
+    public Map<String, Object> likeComment(
+            @RequestParam("commentId") Long commentId,
+            HttpSession session // 로그인 정보 확인용
+    ) {
+        Map<String, Object> response = new HashMap<>();
+
+        // 1. 로그인 체크 (비회원은 좋아요 못 누름)
+        SessionUser user = (SessionUser) session.getAttribute("LOGIN_USER");
+        if (user == null) {
+            response.put("result", "LOGIN_REQUIRED");
+            return response; // "로그인 필요해"라고 응답하고 끝
+        }
+
+        // 2. 서비스 호출: "김 과장, 이 사람(userId)이 이 댓글(commentId) 눌렀어. 처리해줘!"
+        // toggleLike 메서드가 "LIKE" 또는 "UNLIKE" 문자열을 리턴할 거야.
+        String resultType = noticeSvc.toggleLike(commentId, user.getLoginId());
+
+        // 3. 최신 좋아요 개수 가져오기 (화면 갱신용)
+        int newCount = noticeSvc.getLikeCount(commentId);
+
+        // 4. 결과 포장 (성공 여부 + 최신 개수)
+        response.put("result", resultType); // "LIKE" or "UNLIKE"
+        response.put("count", newCount);    // 15
+
+        return response; // JS에게 배달!
     }
 }

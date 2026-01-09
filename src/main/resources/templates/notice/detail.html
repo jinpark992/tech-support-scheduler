@@ -104,17 +104,18 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <strong th:text="${c.writer}">작성자</strong>
-                                    <small class="text-muted ms-2" th:text="${c.createdAt}">날짜</small>
-                                    <div class="mt-1" th:text="${c.content}">댓글 내용</div>
+                                    <span th:text="${c.content}">내용</span>
                                 </div>
 
-                                <button type="button" class="btn btn-outline-danger btn-sm"
-                                        th:onclick="|clickLike(${c.commentId})|">
-                                    <span>❤️</span>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        th:onclick="|toggleLike(${c.commentId})|">
+
+                                    <i th:id="|heart-icon-${c.commentId}|" class="bi bi-heart"></i>
+
                                     <span th:id="|like-count-${c.commentId}|" th:text="${c.likeCount}">0</span>
                                 </button>
                             </div>
-                        </li>
+                            </li>
                     </ul>
 
                     <div class="card-body">
@@ -133,17 +134,32 @@
 
                 <script src="/js/jquery-3.7.1.js"></script>
                 <script>
-                    function clickLike(commentId) {
+                    function toggleLike(commentId) {
                         $.ajax({
                             type: "POST",
-                            url: "/support/notice/comment/like",
-                            data: { "commentId": commentId },
-                            success: function(newCount) {
-                                // 성공하면 해당 댓글의 숫자만 갱신!
-                                $("#like-count-" + commentId).text(newCount);
+                            url: "/support/notice/comment/like", // 컨트롤러 주소
+                            data: { "commentId": commentId },    // 보낼 데이터: { "commentId": 3 }
+
+                            success: function(response) {
+                                // response = { "result": "LIKE", "count": 15 } 또는 { "result": "UNLIKE", "count": 14 }
+
+                                if (response.result === "LOGIN_REQUIRED") {
+                                    alert("로그인이 필요합니다!");
+                                    location.href = "/login"; // 로그인 페이지로 이동
+                                } else if (response.result === "LIKE") {
+                                    // 좋아요 성공 -> 꽉 찬 하트(❤️)로 변경 & 숫자 갱신
+                                    $("#heart-icon-" + commentId).attr("class", "bi bi-heart-fill");
+                                    $("#like-count-" + commentId).text(response.count);
+                                } else if (response.result === "UNLIKE") {
+                                    // 취소 성공 -> 빈 하트(🤍)로 변경 & 숫자 갱신
+                                    $("#heart-icon-" + commentId).attr("class", "bi bi-heart");
+                                    $("#like-count-" + commentId).text(response.count);
+                                } else {
+                                    alert("오류가 발생했습니다.");
+                                }
                             },
                             error: function() {
-                                alert("좋아요 처리에 실패했습니다.");
+                                alert("서버 통신 오류!");
                             }
                         });
                     }

@@ -40,4 +40,16 @@ public interface NoticeDao {
     void increaseLikeCount(Long commentId);
 
     int selectLikeCount(Long commentId);
+
+    // [1] 좋아요 이력 확인 (누가 눌렀나?)
+    int checkLikeHistory(@Param("commentId") Long commentId, @Param("loginId") String loginId);
+
+    // [2] 좋아요 이력 추가
+    void insertLikeHistory(@Param("commentId") Long commentId, @Param("loginId") String loginId);
+
+    // [3] 좋아요 이력 삭제
+    void deleteLikeHistory(@Param("commentId") Long commentId, @Param("loginId") String loginId);
+
+    // [4] 좋아요 수 감소 (기존 increaseLikeCount 반대)
+    void decreaseLikeCount(@Param("commentId") Long commentId);
 }

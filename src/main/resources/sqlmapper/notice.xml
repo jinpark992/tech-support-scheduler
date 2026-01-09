@@ -211,4 +211,28 @@
         WHERE comment_id = #{commentId}
     </select>
 
+    <!--좋아요 + 및 - 데이터-->
+    <select id="checkLikeHistory" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM notice_comment_like
+        WHERE comment_id = #{commentId}
+        AND user_id = #{loginId}  </select>
+
+    <insert id="insertLikeHistory" parameterType="map">
+        INSERT INTO notice_comment_like (comment_id, user_id, created_at)
+        VALUES (#{commentId}, #{loginId}, NOW())
+    </insert>
+
+    <delete id="deleteLikeHistory" parameterType="map">
+        DELETE FROM notice_comment_like
+        WHERE comment_id = #{commentId}
+        AND user_id = #{loginId}
+    </delete>
+
+    <update id="decreaseLikeCount" parameterType="long">
+        UPDATE notice_comment
+        SET like_count = like_count - 1
+        WHERE comment_id = #{commentId}
+    </update>
+
 </mapper>

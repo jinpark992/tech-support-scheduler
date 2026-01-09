@@ -96,4 +96,30 @@ public class NoticeSvc {
         noticeDao.increaseLikeCount(commentId); // 카운트 +1
         return noticeDao.selectLikeCount(commentId); // 증가된 값 조회
     }
+
+    // [좋아요 토글 기능]
+    // 리턴값: "LIKE"(좋아요 성공), "UNLIKE"(취소 성공)
+    public String toggleLike(Long commentId, String loginId) { // 파라미터 이름: loginId
+
+        // 1. "박 기사(DAO), 장부 좀 봐봐. 이 사람이 이 댓글에 이미 눌렀어?"
+        int count = noticeDao.checkLikeHistory(commentId, loginId);
+
+        if (count > 0) {
+            // [CASE A] 이미 눌렀음 -> "취소하고 싶구나!"
+            noticeDao.deleteLikeHistory(commentId, loginId); // 여기도 loginId
+            noticeDao.decreaseLikeCount(commentId);
+            return "UNLIKE";
+
+        } else {
+            // [CASE B] 안 눌렀음 -> "좋아요하고 싶구나!"
+            noticeDao.insertLikeHistory(commentId, loginId); // 여기도 loginId
+            noticeDao.increaseLikeCount(commentId);
+            return "LIKE";
+        }
+    }
+
+    // [조회] 현재 좋아요 개수 가져오기
+    public int getLikeCount(Long commentId) {
+        return noticeDao.selectLikeCount(commentId);
+    }
 }

@@ -29,8 +29,14 @@ public class RoleActionInterceptor implements HandlerInterceptor {
 // ✅ 내정보/비번변경은 전 역할 허용
         if (uri.startsWith("/support/user/")) return true;
 
+        // ✅ [추가] 좋아요/댓글 같은 공통 기능은 역할 상관없이 허용!
+        // 만약 URL에 "/like"가 포함되어 있다면 무조건 통과시킴
+        if (uri.contains("/like")) return true;
+        // 댓글도 누구나 달 수 있다면?
+        // if (uri.contains("/comment")) return true;
 
         String role = user.getRole();
+
 
         // ADMIN은 다 OK
         if ("ROLE_ADMIN".equals(role)) return true;

@@ -1,6 +1,7 @@
 package com.boot.techsupportscheduler.support.vo;
 
 import lombok.Data;
+import java.time.LocalDateTime;
 
 @Data
 public class NoticeComment {
@@ -8,6 +9,6 @@ public class NoticeComment {
     private Long noticeId;
     private String writer;
     private String content;
-    private int likeCount;      // ❤️ 좋아요 수
-    private String createdAt;
+    private int likeCount;
+    private LocalDateTime createdAt;
 }

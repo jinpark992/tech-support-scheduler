@@ -4,8 +4,8 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>공지 상세</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
@@ -68,14 +68,14 @@
                 </div>
             </div>
 
+            <!-- 본문 -->
             <div class="detail-body">
                 <p class="detail-content" th:text="${notice.content}">내용</p>
             </div>
 
-
-
-            <!-- 이전글/다음글 -->
+            <!-- 이전글/다음글 + 댓글 -->
             <div class="detail-nav" style="margin-top:22px; display:grid; gap:8px;">
+
                 <div>
                     이전글 :
                     <span th:if="${prevNotice == null}">없음</span>
@@ -83,6 +83,7 @@
                        th:href="@{/support/notice/detail(noticeId=${prevNotice.noticeId})}"
                        th:text="${prevNotice.title}">이전글</a>
                 </div>
+
                 <div>
                     다음글 :
                     <span th:if="${nextNotice == null}">없음</span>
@@ -91,117 +92,129 @@
                        th:text="${nextNotice.title}">다음글</a>
                 </div>
 
-                <div class="card mt-5 mb-5">
-                    <div class="card-header fw-bold">
-                        댓글 <span th:text="${#lists.size(comments)}">0</span>개
+                <!-- ===== 댓글 카드(정렬 개선 버전) ===== -->
+                <div class="card comment-card">
+                    <div class="card-header comment-card-header">
+                        <div class="comment-card-title">
+                            댓글 <span th:text="${#lists.size(comments)}">0</span>개
+                        </div>
                     </div>
 
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item text-center text-muted" th:if="${#lists.isEmpty(comments)}">
-                            등록된 댓글이 없습니다.
-                        </li>
+                    <!-- 댓글 목록 -->
+                    <div class="comment-list">
 
-                        <!--댓글 -->
-                        <li class="list-group-item" th:each="c : ${comments}">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong th:text="${c.writer}">작성자</strong>
-                                    <span th:text="${c.content}">내용</span>
+                        <!-- 비어있을 때 -->
+                        <div class="comment-empty" th:if="${#lists.isEmpty(comments)}">
+                            등록된 댓글이 없습니다.
+                        </div>
+
+                        <!-- 댓글 1개 -->
+                        <div class="comment-item" th:each="c : ${comments}">
+                            <!-- 왼쪽: 작성자/시간 + 내용 -->
+                            <div class="comment-left">
+                                <div class="comment-top">
+                                    <span class="comment-author" th:text="${c.writer}">admin</span>
+
+                                    <!-- createdAt이 있다면 표시 (VO에 없으면 이 span 통째로 삭제해도 됨) -->
+                                    <span class="comment-date"
+                                          th:if="${c.createdAt != null}"
+                                          th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-10 19:40</span>
                                 </div>
 
-                                <div class="d-flex align-items-center gap-2">
-                                    <!-- 좋아요(AJAX는 기존 그대로 유지) -->
-                                    <button type="button" class="btn btn-sm btn-outline-danger"
-                                            th:onclick="|toggleLike(${c.commentId})|">
-                                        <i th:id="|heart-icon-${c.commentId}|" class="bi bi-heart"></i>
-                                        <span th:id="|like-count-${c.commentId}|" th:text="${c.likeCount}">0</span>
-                                    </button>
+                                <div class="comment-content" th:text="${c.content}">내용</div>
+                            </div>
 
-                                    <!-- 수정/삭제: 로그인 + (본인 or ADMIN)만 -->
-                                    <div class="d-flex gap-1"
-                                         th:if="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.loginId == c.writer)}">
+                            <!-- 오른쪽: 좋아요 + 수정/삭제 -->
+                            <div class="comment-right">
+                                <!-- 좋아요(AJAX 그대로) -->
+                                <button type="button" class="btn btn-outline-danger btn-sm comment-like"
+                                        th:onclick="|toggleLike(${c.commentId})|">
+                                    <i th:id="|heart-icon-${c.commentId}|" class="bi bi-heart"></i>
+                                    <span th:id="|like-count-${c.commentId}|" th:text="${c.likeCount}">0</span>
+                                </button>
 
-                                        <a class="btn btn-sm btn-outline-primary"
-                                           th:href="@{/support/notice/comment/editForm(commentId=${c.commentId}, noticeId=${notice.noticeId})}">
-                                            수정
-                                        </a>
+                                <!-- 수정/삭제: 로그인 + (본인 or ADMIN)만 -->
+                                <div class="comment-manage"
+                                     th:if="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.loginId == c.writer)}">
 
-                                        <form th:action="@{/support/notice/comment/delete}" method="post"
-                                              onsubmit="return confirm('댓글을 삭제할까요?');" style="display:inline;">
-                                            <input type="hidden" name="commentId" th:value="${c.commentId}">
-                                            <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
-                                            <button type="submit" class="btn btn-sm btn-outline-secondary">삭제</button>
-                                        </form>
+                                    <a class="btn btn-outline-primary btn-sm"
+                                       th:href="@{/support/notice/comment/editForm(commentId=${c.commentId}, noticeId=${notice.noticeId})}">
+                                        수정
+                                    </a>
 
-                                    </div>
+                                    <form class="comment-delete-form"
+                                          th:action="@{/support/notice/comment/delete}" method="post"
+                                          onsubmit="return confirm('댓글을 삭제할까요?');">
+                                        <input type="hidden" name="commentId" th:value="${c.commentId}">
+                                        <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm">삭제</button>
+                                    </form>
                                 </div>
                             </div>
-                        </li>
+                        </div>
+                    </div>
 
-                    </ul>
-
-                    <div class="card-body">
-
+                    <!-- 댓글 작성 -->
+                    <div class="comment-form-wrap">
                         <!-- 로그인한 경우만 댓글 입력 -->
                         <div th:if="${session.LOGIN_USER != null}">
-                            <form th:action="@{/support/notice/comment/add}" method="post">
+                            <form th:action="@{/support/notice/comment/add}" method="post" class="comment-form">
                                 <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
 
-                                <div class="input-group">
-        <textarea class="form-control" name="content" rows="2"
-                  placeholder="댓글을 입력하세요..." required></textarea>
-                                    <button class="btn btn-dark" type="submit">등록</button>
-                                </div>
+                                <textarea class="comment-textarea" name="content" rows="2"
+                                          placeholder="댓글을 입력하세요..." required></textarea>
+
+                                <button class="btn btn-dark comment-submit" type="submit">등록</button>
                             </form>
                         </div>
 
                         <!-- 비로그인: 안내 + 로그인 링크 -->
-                        <div th:if="${session.LOGIN_USER == null}" class="text-muted">
+                        <div th:if="${session.LOGIN_USER == null}" class="comment-login-hint">
                             댓글 작성은 로그인 후 가능합니다.
-                            <a class="btn btn-sm btn-outline-primary ms-2" th:href="@{/login}">로그인</a>
+                            <a class="btn btn-sm btn-outline-primary" th:href="@{/login}">로그인</a>
                         </div>
-
                     </div>
+                </div>
+                <!-- ===== 댓글 카드 끝 ===== -->
 
-
-                    <script src="/js/jquery-3.7.1.js"></script>
-                <script>
-                    function toggleLike(commentId) {
-                        $.ajax({
-                            type: "POST",
-                            url: "/support/notice/comment/like", // 컨트롤러 주소
-                            data: { "commentId": commentId },    // 보낼 데이터: { "commentId": 3 }
-
-                            success: function(response) {
-                                // response = { "result": "LIKE", "count": 15 } 또는 { "result": "UNLIKE", "count": 14 }
-
-                                if (response.result === "LOGIN_REQUIRED") {
-                                    alert("로그인이 필요합니다!");
-                                    location.href = "/login"; // 로그인 페이지로 이동
-                                } else if (response.result === "LIKE") {
-                                    // 좋아요 성공 -> 꽉 찬 하트(❤️)로 변경 & 숫자 갱신
-                                    $("#heart-icon-" + commentId).attr("class", "bi bi-heart-fill");
-                                    $("#like-count-" + commentId).text(response.count);
-                                } else if (response.result === "UNLIKE") {
-                                    // 취소 성공 -> 빈 하트(🤍)로 변경 & 숫자 갱신
-                                    $("#heart-icon-" + commentId).attr("class", "bi bi-heart");
-                                    $("#like-count-" + commentId).text(response.count);
-                                } else {
-                                    alert("오류가 발생했습니다.");
-                                }
-                            },
-                            error: function() {
-                                alert("서버 통신 오류!");
-                            }
-                        });
-                    }
-                </script>
             </div>
+            <!-- detail-nav 끝 -->
 
         </section>
     </main>
 
     <div th:replace="~{comm/footer :: footer}"></div>
 </div>
+
+<!-- 스크립트는 body 끝에 두는게 안전 -->
+<script src="/js/jquery-3.7.1.js"></script>
+<script>
+    function toggleLike(commentId) {
+        $.ajax({
+            type: "POST",
+            url: "/support/notice/comment/like",
+            data: { "commentId": commentId },
+
+            success: function(response) {
+                if (response.result === "LOGIN_REQUIRED") {
+                    alert("로그인이 필요합니다!");
+                    location.href = "/login";
+                } else if (response.result === "LIKE") {
+                    $("#heart-icon-" + commentId).attr("class", "bi bi-heart-fill");
+                    $("#like-count-" + commentId).text(response.count);
+                } else if (response.result === "UNLIKE") {
+                    $("#heart-icon-" + commentId).attr("class", "bi bi-heart");
+                    $("#like-count-" + commentId).text(response.count);
+                } else {
+                    alert("오류가 발생했습니다.");
+                }
+            },
+            error: function() {
+                alert("서버 통신 오류!");
+            }
+        });
+    }
+</script>
+
 </body>
 </html>

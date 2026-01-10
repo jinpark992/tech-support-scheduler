@@ -89,7 +89,7 @@
 
                         <div class="field">
                             <label class="label">검색어</label>
-                            <input class="input" type="text" name="q" placeholder="검색어 입력"a
+                            <input class="input" type="text" name="q" placeholder="검색어 입력"
                                    th:value="${q}">
                         </div>
 
@@ -131,8 +131,7 @@
                             <th>제목</th>
                             <th style="width:160px;">작성일</th>
                             <th style="width:120px;">조회수</th>
-                            <th style="width:120px;">관리</th>
-                            <th style="width:140px;">작성자</th>
+                                <th style="width:140px;">작성자</th>
                         </tr>
                         </thead>
 
@@ -160,13 +159,7 @@
 
                             <td class="t-center" th:text="${n.views}">5</td>
 
-                            <td class="t-center">
-                                <form th:action="@{/support/notice/delete}" method="POST"
-                                      onsubmit="return confirm('정말 삭제할까요?');">
-                                    <input type="hidden" name="noticeId" th:value="${n.noticeId}">
-                                    <button type="submit" class="btn btn-danger btn-sm">삭제</button>
-                                </form>
-                            </td>
+
 
                             <td class="t-center" th:text="${n.writer != null ? n.writer : 'admin'}">admin</td>
                         </tr>

@@ -43,11 +43,7 @@ public class JoinCon {
             // 입력값 복원(비번 제외)
             model.addAttribute("loginId", loginId);
             model.addAttribute("name", name);
-
-            // ✅ 여기 버그였음: roles로 넣어야 함 (role 아님)
             model.addAttribute("roles", ROLES);
-
-            // ✅ 사용자가 선택했던 role 복원
             model.addAttribute("selectedRole", role);
 
             return "auth/join";

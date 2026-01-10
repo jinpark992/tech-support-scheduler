@@ -5,11 +5,10 @@
 
 <mapper namespace="com.boot.techsupportscheduler.support.dao.SupportDao">
 
-    <!-- 목록 -->
     <select id="doList" resultType="com.boot.techsupportscheduler.support.vo.Support">
         SELECT
         s.ticket_id      AS ticketId,
-        DATE_FORMAT(s.support_date, '%Y-%m-%d') AS supportDate,
+        s.support_date   AS supportDate,
         s.project_id     AS projectId,
         p.project_name   AS projectName,
         s.support_type   AS supportType,
@@ -29,7 +28,7 @@
     <select id="doDetail" parameterType="long" resultType="com.boot.techsupportscheduler.support.vo.Support">
         SELECT
         s.ticket_id AS ticketId,
-        DATE_FORMAT(s.support_date, '%Y-%m-%d') AS supportDate,
+        s.support_date AS supportDate,
         s.project_id AS projectId,
         p.project_name AS projectName,
         p.sales_manager AS salesManager,
@@ -48,53 +47,24 @@
         LIMIT 1
     </select>
 
-
-
-
-    <!-- 등록
-            ⚠ ticket_id는 AUTO_INCREMENT 여야 useGeneratedKeys로 PK가 들어옴 -->
-    <insert id="doInsert"
-            parameterType="com.boot.techsupportscheduler.support.vo.Support"
-            useGeneratedKeys="true"
-            keyProperty="ticketId">
-        INSERT INTO support (
-        support_date,
-        project_id,
-        support_type,
-        status,
-        title,
-        content,
-        created_at,
-        updated_at,
-        deleted_yn
-        ) VALUES (
-        #{supportDate},
-        #{projectId},
-        #{supportType},
-        IFNULL(#{status}, 'OPEN'),
-        #{title},
-        #{content},
-        NOW(),
-        NOW(),
-        IFNULL(#{deletedYn}, 'N')
-        )
+    <insert id="doInsert" parameterType="com.boot.techsupportscheduler.support.vo.Support">
+        INSERT INTO support
+        (support_date, project_id, support_type, status, title, content, created_at, updated_at, deleted_yn, deleted_at)
+        VALUES
+        (#{supportDate}, #{projectId}, #{supportType}, #{status}, #{title}, #{content}, NOW(), NOW(), IFNULL(#{deletedYn}, 'N'), NULL)
     </insert>
 
-    <!-- 삭제(소프트 삭제) -->
     <update id="doDelete" parameterType="long">
         UPDATE support
         SET deleted_yn = 'Y',
-        deleted_at = NOW(),
-        updated_at = NOW()
+        deleted_at = NOW()
         WHERE ticket_id = #{id}
         AND deleted_yn = 'N'
     </update>
 
-    <!-- 수정 -->
     <update id="doUpdate" parameterType="com.boot.techsupportscheduler.support.vo.Support">
         UPDATE support
-        SET
-        support_date = #{supportDate},
+        SET support_date = #{supportDate},
         project_id   = #{projectId},
         support_type = #{supportType},
         status       = #{status},
@@ -104,8 +74,5 @@
         WHERE ticket_id = #{ticketId}
         AND deleted_yn = 'N'
     </update>
-
-
-
 
 </mapper>

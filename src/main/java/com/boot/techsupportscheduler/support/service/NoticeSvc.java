@@ -1,10 +1,7 @@
 package com.boot.techsupportscheduler.support.service;
 
 import com.boot.techsupportscheduler.support.dao.NoticeDao;
-import com.boot.techsupportscheduler.support.vo.Notice;
-import com.boot.techsupportscheduler.support.vo.NoticeComment;
-import com.boot.techsupportscheduler.support.vo.NoticePageResult;
-import com.boot.techsupportscheduler.support.vo.PageInfo;
+import com.boot.techsupportscheduler.support.vo.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -122,4 +119,31 @@ public class NoticeSvc {
     public int getLikeCount(Long commentId) {
         return noticeDao.selectLikeCount(commentId);
     }
+
+    public NoticeComment getCommentById(Long commentId) {
+        return noticeDao.selectCommentById(commentId);
+    }
+
+    public boolean editComment(Long commentId, String content, SessionUser user) {
+        NoticeComment c = noticeDao.selectCommentById(commentId);
+        if (c == null) return false;
+
+        boolean can = "ROLE_ADMIN".equals(user.getRole()) || user.getLoginId().equals(c.getWriter());
+        if (!can) return false;
+
+        noticeDao.updateCommentContent(commentId, content);
+        return true;
+    }
+
+    public boolean deleteComment(Long commentId, SessionUser user) {
+        NoticeComment c = noticeDao.selectCommentById(commentId);
+        if (c == null) return false;
+
+        boolean can = "ROLE_ADMIN".equals(user.getRole()) || user.getLoginId().equals(c.getWriter());
+        if (!can) return false;
+
+        noticeDao.softDeleteComment(commentId);
+        return true;
+    }
+
 }

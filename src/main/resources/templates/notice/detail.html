@@ -109,32 +109,62 @@
                                     <span th:text="${c.content}">내용</span>
                                 </div>
 
-                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                        th:onclick="|toggleLike(${c.commentId})|">
+                                <div class="d-flex align-items-center gap-2">
+                                    <!-- 좋아요(AJAX는 기존 그대로 유지) -->
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            th:onclick="|toggleLike(${c.commentId})|">
+                                        <i th:id="|heart-icon-${c.commentId}|" class="bi bi-heart"></i>
+                                        <span th:id="|like-count-${c.commentId}|" th:text="${c.likeCount}">0</span>
+                                    </button>
 
-                                    <i th:id="|heart-icon-${c.commentId}|" class="bi bi-heart"></i>
+                                    <!-- 수정/삭제: 로그인 + (본인 or ADMIN)만 -->
+                                    <div class="d-flex gap-1"
+                                         th:if="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.loginId == c.writer)}">
 
-                                    <span th:id="|like-count-${c.commentId}|" th:text="${c.likeCount}">0</span>
-                                </button>
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           th:href="@{/support/notice/comment/editForm(commentId=${c.commentId}, noticeId=${notice.noticeId})}">
+                                            수정
+                                        </a>
+
+                                        <form th:action="@{/support/notice/comment/delete}" method="post"
+                                              onsubmit="return confirm('댓글을 삭제할까요?');" style="display:inline;">
+                                            <input type="hidden" name="commentId" th:value="${c.commentId}">
+                                            <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary">삭제</button>
+                                        </form>
+
+                                    </div>
+                                </div>
                             </div>
-                            </li>
+                        </li>
+
                     </ul>
 
                     <div class="card-body">
-                        <form action="/support/notice/comment/add" method="post">
-                            <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
-                            <input type="hidden" name="writer"
-                                   th:value="${session.LOGIN_USER != null ? session.LOGIN_USER.loginId : 'guest'}">
 
-                            <div class="input-group">
-                                <textarea class="form-control" name="content" rows="2" placeholder="댓글을 입력하세요..." required></textarea>
-                                <button class="btn btn-dark" type="submit">등록</button>
-                            </div>
-                        </form>
+                        <!-- 로그인한 경우만 댓글 입력 -->
+                        <div th:if="${session.LOGIN_USER != null}">
+                            <form th:action="@{/support/notice/comment/add}" method="post">
+                                <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+
+                                <div class="input-group">
+        <textarea class="form-control" name="content" rows="2"
+                  placeholder="댓글을 입력하세요..." required></textarea>
+                                    <button class="btn btn-dark" type="submit">등록</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 비로그인: 안내 + 로그인 링크 -->
+                        <div th:if="${session.LOGIN_USER == null}" class="text-muted">
+                            댓글 작성은 로그인 후 가능합니다.
+                            <a class="btn btn-sm btn-outline-primary ms-2" th:href="@{/login}">로그인</a>
+                        </div>
+
                     </div>
-                </div>
 
-                <script src="/js/jquery-3.7.1.js"></script>
+
+                    <script src="/js/jquery-3.7.1.js"></script>
                 <script>
                     function toggleLike(commentId) {
                         $.ajax({

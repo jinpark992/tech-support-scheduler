@@ -235,4 +235,34 @@
         WHERE comment_id = #{commentId}
     </update>
 
+    <select id="selectCommentById" parameterType="long"
+            resultType="com.boot.techsupportscheduler.support.vo.NoticeComment">
+        SELECT
+        comment_id AS commentId,
+        notice_id  AS noticeId,
+        writer     AS writer,
+        content    AS content,
+        like_count AS likeCount,
+        created_at AS createdAt
+        FROM notice_comment
+        WHERE comment_id = #{commentId}
+        AND deleted_yn = 'N'
+        LIMIT 1
+    </select>
+
+    <update id="updateCommentContent" parameterType="map">
+        UPDATE notice_comment
+        SET content = #{content}
+        WHERE comment_id = #{commentId}
+        AND deleted_yn = 'N'
+    </update>
+
+    <update id="softDeleteComment" parameterType="long">
+        UPDATE notice_comment
+        SET deleted_yn = 'Y'
+        WHERE comment_id = #{commentId}
+        AND deleted_yn = 'N'
+    </update>
+
+
 </mapper>

@@ -52,4 +52,13 @@ public interface NoticeDao {
 
     // [4] 좋아요 수 감소 (기존 increaseLikeCount 반대)
     void decreaseLikeCount(@Param("commentId") Long commentId);
+
+    NoticeComment selectCommentById(Long commentId);
+
+
+    int updateCommentContent(@Param("commentId") Long commentId,
+                             @Param("content") String content);
+
+    int softDeleteComment(@Param("commentId") Long commentId);
+
 }

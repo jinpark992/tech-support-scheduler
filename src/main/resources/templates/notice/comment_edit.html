@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>댓글 수정</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{comm/header :: header(activeMenu=${activeMenu})}"></div>
+
+    <main class="content">
+        <section class="detail-card">
+            <h2>댓글 수정</h2>
+
+            <form th:action="@{/support/notice/comment/edit}" method="post">
+                <input type="hidden" name="noticeId" th:value="${noticeId}">
+                <input type="hidden" name="commentId" th:value="${comment.commentId}">
+
+                <div class="mb-3">
+                    <label class="form-label">작성자</label>
+                    <input class="form-control" type="text" th:value="${comment.writer}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">내용</label>
+                    <textarea class="form-control" name="content" rows="4" required
+                              th:text="${comment.content}"></textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">저장</button>
+                    <a class="btn btn-ghost"
+                       th:href="@{/support/notice/detail(noticeId=${noticeId})}">취소</a>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <div th:replace="~{comm/footer :: footer}"></div>
+</div>
+</body>
+</html>

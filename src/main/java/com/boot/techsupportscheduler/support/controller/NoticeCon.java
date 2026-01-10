@@ -96,10 +96,22 @@ public class NoticeCon {
 
     // 2. [추가] 댓글 등록 (저장하고 다시 상세화면으로)
     @PostMapping("/notice/comment/add")
-    public String addComment(@ModelAttribute NoticeComment comment) {
-        noticeSvc.addComment(comment);
-        return "redirect:/support/notice/detail?noticeId=" + comment.getNoticeId();
+    public String addComment(@RequestParam Long noticeId,
+                             @RequestParam String content,
+                             HttpSession session) {
+
+        SessionUser user = (SessionUser) session.getAttribute("LOGIN_USER");
+        if (user == null) return "redirect:/login";
+
+        NoticeComment c = new NoticeComment();
+        c.setNoticeId(noticeId);
+        c.setWriter(user.getLoginId());   // ✅ writer는 세션으로
+        c.setContent(content);
+
+        noticeSvc.addComment(c);
+        return "redirect:/support/notice/detail?noticeId=" + noticeId;
     }
+
 
     // ✅ 수정 폼
     @GetMapping("/notice/edit")
@@ -178,4 +190,57 @@ public class NoticeCon {
 
         return response; // JS에게 배달!
     }
+
+    @GetMapping("/notice/comment/editForm")
+    public String editCommentForm(@RequestParam Long commentId,
+                                  @RequestParam Long noticeId,
+                                  Model model,
+                                  HttpSession session) {
+
+        SessionUser user = (SessionUser) session.getAttribute("LOGIN_USER");
+        if (user == null) return "redirect:/login";
+
+        NoticeComment c = noticeSvc.getCommentById(commentId);
+        if (c == null) return "redirect:/support/notice/detail?noticeId=" + noticeId;
+
+        boolean can = "ROLE_ADMIN".equals(user.getRole()) || user.getLoginId().equals(c.getWriter());
+        if (!can) return "redirect:/support/forbidden";
+
+        model.addAttribute("activeMenu", "home");
+        model.addAttribute("noticeId", noticeId);
+        model.addAttribute("comment", c);
+        return "notice/comment_edit";
+    }
+
+    @PostMapping("/notice/comment/edit")
+    public String editComment(@RequestParam Long commentId,
+                              @RequestParam Long noticeId,
+                              @RequestParam String content,
+                              HttpSession session) {
+
+        SessionUser user = (SessionUser) session.getAttribute("LOGIN_USER");
+        if (user == null) return "redirect:/login";
+
+        boolean ok = noticeSvc.editComment(commentId, content, user);
+        if (!ok) return "redirect:/support/forbidden";
+
+        return "redirect:/support/notice/detail?noticeId=" + noticeId;
+    }
+
+    @PostMapping("/notice/comment/delete")
+    public String deleteComment(@RequestParam Long commentId,
+                                @RequestParam Long noticeId,
+                                HttpSession session) {
+
+        SessionUser user = (SessionUser) session.getAttribute("LOGIN_USER");
+        if (user == null) return "redirect:/login";
+
+        boolean ok = noticeSvc.deleteComment(commentId, user);
+        if (!ok) return "redirect:/support/forbidden";
+
+        return "redirect:/support/notice/detail?noticeId=" + noticeId;
+    }
+
+
+
 }

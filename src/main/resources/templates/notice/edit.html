@@ -18,7 +18,13 @@
                 <a class="btn btn-ghost" th:href="@{/support/notice}">목록으로</a>
             </div>
 
-            <form class="form" th:action="@{/support/notice/edit}" method="post" th:object="${notice}">
+            <!-- ✅ 파일 업로드하려면 enctype 필수 -->
+            <form class="form"
+                  th:action="@{/support/notice/edit}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  th:object="${notice}">
+
                 <!-- ✅ 어떤 글 수정인지 꼭 보내라 -->
                 <input type="hidden" th:field="*{noticeId}"/>
 
@@ -40,11 +46,33 @@
                     <textarea th:field="*{content}" rows="10" placeholder="내용을 입력하세요" required></textarea>
                 </div>
 
+                <!-- ✅ [추가] 첨부파일 (새 파일 추가 업로드) -->
+                <div class="field">
+                    <label>첨부파일 추가</label>
+                    <input type="file" name="files" multiple/>
+                    <small class="help">기존 파일은 유지되고, 선택한 파일이 추가로 업로드됩니다.</small>
+                </div>
+
+                <!-- ✅ [추가] 기존 첨부파일 목록 보여주기 (컨트롤러에서 model.addAttribute("files", ...) 내려줄 때만) -->
+                <div class="field" th:if="${files != null}">
+                    <label>기존 첨부파일</label>
+
+                    <div th:if="${#lists.isEmpty(files)}">없음</div>
+
+                    <ul th:if="${!#lists.isEmpty(files)}">
+                        <li th:each="f : ${files}">
+                            <a th:href="@{/support/notice/file(noticeId=${notice.noticeId}, name=${f})}"
+                               th:text="${#strings.substringAfter(f,'__')}"></a>
+                        </li>
+                    </ul>
+                </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">수정 저장</button>
                     <a class="btn btn-ghost" th:href="@{/support/notice/detail(noticeId=${notice.noticeId})}">취소</a>
                 </div>
             </form>
+
         </section>
     </main>
 

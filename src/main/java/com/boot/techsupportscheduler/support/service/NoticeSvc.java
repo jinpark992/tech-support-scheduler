@@ -4,11 +4,17 @@ import com.boot.techsupportscheduler.support.dao.NoticeDao;
 import com.boot.techsupportscheduler.support.vo.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Log4j2
@@ -144,6 +150,51 @@ public class NoticeSvc {
 
         noticeDao.softDeleteComment(commentId);
         return true;
+    }
+
+    // NoticeSvc 클래스 안에 넣어라.
+
+
+    public void saveFilesToDisk(Long noticeId, MultipartFile[] files) throws Exception {
+        // files가 없으면 아무것도 안 함
+        if (noticeId == null || files == null || files.length == 0) return;
+
+        // 저장 폴더: 사용자홈/notice_upload/공지번호
+        Path dir = Paths.get(System.getProperty("user.home"), "notice_upload", String.valueOf(noticeId));
+        Files.createDirectories(dir);
+
+        for (MultipartFile f : files) {
+            if (f == null || f.isEmpty()) continue;
+
+            String original = Optional.ofNullable(f.getOriginalFilename()).orElse("file");
+            original = original.replaceAll("[\\\\/]", "_").replaceAll("\\s+", "_"); // 경로/공백 방지
+
+            String saveName = UUID.randomUUID() + "__" + original; // 저장명: UUID__원본명
+            f.transferTo(dir.resolve(saveName).toFile());
+        }
+    }
+
+    public List<String> listSavedFileNames(Long noticeId) throws Exception {
+        Path dir = Paths.get(System.getProperty("user.home"), "notice_upload", String.valueOf(noticeId));
+        if (!Files.exists(dir)) return List.of();
+
+        try (Stream<Path> stream = Files.list(dir)) {
+            return stream.filter(Files::isRegularFile)
+                    .map(p -> p.getFileName().toString())
+                    .sorted()
+                    .collect(Collectors.toList());
+        }
+    }
+
+    public Resource loadFileAsResource(Long noticeId, String name) throws Exception {
+        Path path = Paths.get(System.getProperty("user.home"), "notice_upload", String.valueOf(noticeId), name);
+        if (!Files.exists(path)) return null;
+        return new UrlResource(path.toUri());
+    }
+
+    public String extractOriginalName(String savedName) {
+        int idx = savedName.indexOf("__");
+        return (idx >= 0) ? savedName.substring(idx + 2) : savedName;
     }
 
 }

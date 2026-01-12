@@ -8,10 +8,16 @@ import com.boot.techsupportscheduler.support.vo.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,77 +30,149 @@ public class NoticeCon {
     @Autowired
     NoticeSvc noticeSvc;
 
-    // ✅ 목록 화면 (대시보드/공지사항 목록) - 페이징 포함
-    // URL: http://localhost:8088/support/notice
+    // ✅ 목록
     @GetMapping("/notice")
-    public String list(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            Model model
-    ) {
-        // ✅ 처음 들어올 땐 “기본값(검색 없음)”으로 페이징 조회
+    public String list(@RequestParam(defaultValue = "1") int page,
+                       @RequestParam(defaultValue = "10") int size,
+                       Model model) {
+
         NoticePageResult r = noticeSvc.doSearchPaged("all", null, "", "new", page, size);
 
         model.addAttribute("activeMenu", "home");
         model.addAttribute("notices", r.getNotices());
         model.addAttribute("pageInfo", r.getPageInfo());
 
-        // ✅ 화면 선택값 유지(기본값)
         model.addAttribute("field", "all");
-        model.addAttribute("q", r.getQ()); // null일 수 있음
+        model.addAttribute("q", r.getQ());
         model.addAttribute("topOnly", "");
         model.addAttribute("sort", "new");
 
         return "home/home";
     }
 
-    @PostMapping("/notice/delete")
-    public String doDelete(@RequestParam("noticeId") Long noticeId) {
-        log.info("noticeId : {}", noticeId);
-        noticeSvc.doDelete(noticeId);
-        return "redirect:/support/notice";
-    }
-
-    // ✅ 등록 폼 화면
+    // ✅ 등록 폼
     @GetMapping("/notice/new")
     public String getForm(Model model) {
         model.addAttribute("activeMenu", "home");
-        model.addAttribute("notice", new Notice()); // th:object="${notice}" 때문에 필요
+        model.addAttribute("notice", new Notice());
         return "notice/form";
     }
 
-    // ✅ 등록 처리
+    // ✅ 등록 처리 (+ 파일 저장)
+    // 핵심: MultipartFile[] files 받고 -> insert 후 noticeId로 저장
     @PostMapping("/notice/new")
-    public String postForm(@ModelAttribute("notice") Notice notice) {
+    public String postForm(@ModelAttribute("notice") Notice notice,
+                           @RequestParam(value = "files", required = false) MultipartFile[] files) {
+
         notice.setViews(0);
         notice.setDeleteYn("N");
 
-        log.info("등록 요청 notice = {}", notice);
-        noticeSvc.doInsert(notice);
+        noticeSvc.doInsert(notice); // ★ 여기서 notice.noticeId가 채워져야 함 (useGeneratedKeys 설정 필요)
 
-        return "redirect:/support/notice";
+        // ★ 파일 저장 (DB 없이 디스크 저장)
+        try {
+            noticeSvc.saveFilesToDisk(notice.getNoticeId(), files);
+        } catch (Exception e) {
+            log.error("파일 저장 실패", e);
+        }
+
+        return "redirect:/support/notice/detail?noticeId=" + notice.getNoticeId();
     }
 
-    // ✅ 상세 화면
+    // ✅ 상세 (+ 파일목록 내려줌)
     @GetMapping("/notice/detail")
     public String detail(@RequestParam("noticeId") Long noticeId, Model model) {
+
         Notice notice = noticeSvc.doDetail(noticeId);
         Notice prev = noticeSvc.doPrev(noticeId);
         Notice next = noticeSvc.doNext(noticeId);
 
-        // ⭐ [추가] 댓글 목록 가져오기
         List<NoticeComment> comments = noticeSvc.getCommentList(noticeId);
+
+        // ★ 첨부파일 목록 (저장된 파일명 리스트)
+        List<String> savedNames;
+        try {
+            savedNames = noticeSvc.listSavedFileNames(noticeId);
+        } catch (Exception e) {
+            log.error("파일 목록 조회 실패", e);
+            savedNames = List.of();
+        }
 
         model.addAttribute("activeMenu", "home");
         model.addAttribute("notice", notice);
         model.addAttribute("prevNotice", prev);
         model.addAttribute("nextNotice", next);
-        model.addAttribute("comments", comments); // 화면으로 전달!
+        model.addAttribute("comments", comments);
+
+        // ★ detail.html에서 files로 출력
+        model.addAttribute("files", savedNames);
 
         return "notice/detail";
     }
 
-    // 2. [추가] 댓글 등록 (저장하고 다시 상세화면으로)
+    // ✅ 파일 다운로드 (DB 없이: noticeId + savedName 으로 다운)
+    @GetMapping("/notice/file")
+    @ResponseBody
+    public ResponseEntity<Resource> download(@RequestParam Long noticeId,
+                                             @RequestParam String name) throws Exception {
+
+        Resource resource = noticeSvc.loadFileAsResource(noticeId, name);
+        if (resource == null) return ResponseEntity.notFound().build();
+
+        // 다운로드 파일명은 원본명으로
+        String originalName = noticeSvc.extractOriginalName(name);
+        String encoded = URLEncoder.encode(originalName, StandardCharsets.UTF_8).replace("+", "%20");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
+                .body(resource);
+    }
+
+    // ✅ 수정 폼 (+ 현재 파일목록 보여주려면 model에 files 내려주면 됨)
+    @GetMapping("/notice/edit")
+    public String getEdit(@RequestParam("noticeId") Long noticeId, Model model) {
+        Notice notice = noticeSvc.doDetail(noticeId);
+
+        List<String> savedNames;
+        try {
+            savedNames = noticeSvc.listSavedFileNames(noticeId);
+        } catch (Exception e) {
+            log.error("파일 목록 조회 실패", e);
+            savedNames = List.of();
+        }
+
+        model.addAttribute("activeMenu", "home");
+        model.addAttribute("notice", notice);
+        model.addAttribute("files", savedNames); // ★ edit.html에서 출력 가능
+        return "notice/edit";
+    }
+
+    // ✅ 수정 처리 (+ 파일 추가 업로드)
+    // 제일 쉬운 동작: "새 파일 올리면 기존 파일은 그대로 두고 추가"
+    // (교체하고 싶으면 아래 replaceFiles 체크박스 방식으로 확장 가능)
+    @PostMapping("/notice/edit")
+    public String postEdit(@ModelAttribute("notice") Notice notice,
+                           @RequestParam(value = "files", required = false) MultipartFile[] files) {
+
+        noticeSvc.doUpdate(notice);
+
+        try {
+            noticeSvc.saveFilesToDisk(notice.getNoticeId(), files); // ★ 수정 시에도 파일 추가 저장
+        } catch (Exception e) {
+            log.error("파일 저장 실패(수정)", e);
+        }
+
+        return "redirect:/support/notice/detail?noticeId=" + notice.getNoticeId();
+    }
+
+    // ---------------- 댓글/좋아요/삭제 등 기존 로직은 그대로 ----------------
+
+    @PostMapping("/notice/delete")
+    public String doDelete(@RequestParam("noticeId") Long noticeId) {
+        noticeSvc.doDelete(noticeId);
+        return "redirect:/support/notice";
+    }
+
     @PostMapping("/notice/comment/add")
     public String addComment(@RequestParam Long noticeId,
                              @RequestParam String content,
@@ -105,90 +183,31 @@ public class NoticeCon {
 
         NoticeComment c = new NoticeComment();
         c.setNoticeId(noticeId);
-        c.setWriter(user.getLoginId());   // ✅ writer는 세션으로
+        c.setWriter(user.getLoginId());
         c.setContent(content);
 
         noticeSvc.addComment(c);
         return "redirect:/support/notice/detail?noticeId=" + noticeId;
     }
 
-
-    // ✅ 수정 폼
-    @GetMapping("/notice/edit")
-    public String getEdit(@RequestParam("noticeId") Long noticeId, Model model) {
-        Notice notice = noticeSvc.doDetail(noticeId);
-
-        model.addAttribute("activeMenu", "home");
-        model.addAttribute("notice", notice);
-
-        return "notice/edit";
-    }
-
-    // ✅ 수정 처리
-    @PostMapping("/notice/edit")
-    public String postEdit(@ModelAttribute("notice") Notice notice) {
-        noticeSvc.doUpdate(notice);
-        return "redirect:/support/notice/detail?noticeId=" + notice.getNoticeId();
-    }
-
-    // ✅ 검색(POST 유지) + 페이징
-    @PostMapping("/notice_search")
-    public String noticeSearch(
-            @RequestParam(defaultValue = "all") String field,
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String topOnly,
-            @RequestParam(defaultValue = "new") String sort,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            Model model
-    ) {
-        // ✅ 검색 조건을 포함해서 페이징 조회
-        NoticePageResult r = noticeSvc.doSearchPaged(field, q, topOnly, sort, page, size);
-
-        model.addAttribute("activeMenu", "home");
-        model.addAttribute("notices", r.getNotices());
-        model.addAttribute("pageInfo", r.getPageInfo());
-
-        // ✅ 화면 선택값 유지(사용자 선택값)
-        model.addAttribute("field", field);
-        model.addAttribute("q", r.getQ());
-        model.addAttribute("topOnly", topOnly);
-        model.addAttribute("sort", sort);
-
-        return "home/home";
-    }
-
-    // ==================================================================
-    // [AJAX] 좋아요 토글 (누르면 ON, 또 누르면 OFF)
-    // 리턴값 예시: { "result": "LIKE", "count": 5 }
-    // ==================================================================
     @ResponseBody
     @PostMapping("/notice/comment/like")
-    public Map<String, Object> likeComment(
-            @RequestParam("commentId") Long commentId,
-            HttpSession session // 로그인 정보 확인용
-    ) {
+    public Map<String, Object> likeComment(@RequestParam("commentId") Long commentId,
+                                           HttpSession session) {
         Map<String, Object> response = new HashMap<>();
 
-        // 1. 로그인 체크 (비회원은 좋아요 못 누름)
         SessionUser user = (SessionUser) session.getAttribute("LOGIN_USER");
         if (user == null) {
             response.put("result", "LOGIN_REQUIRED");
-            return response; // "로그인 필요해"라고 응답하고 끝
+            return response;
         }
 
-        // 2. 서비스 호출: "김 과장, 이 사람(userId)이 이 댓글(commentId) 눌렀어. 처리해줘!"
-        // toggleLike 메서드가 "LIKE" 또는 "UNLIKE" 문자열을 리턴할 거야.
         String resultType = noticeSvc.toggleLike(commentId, user.getLoginId());
-
-        // 3. 최신 좋아요 개수 가져오기 (화면 갱신용)
         int newCount = noticeSvc.getLikeCount(commentId);
 
-        // 4. 결과 포장 (성공 여부 + 최신 개수)
-        response.put("result", resultType); // "LIKE" or "UNLIKE"
-        response.put("count", newCount);    // 15
-
-        return response; // JS에게 배달!
+        response.put("result", resultType);
+        response.put("count", newCount);
+        return response;
     }
 
     @GetMapping("/notice/comment/editForm")

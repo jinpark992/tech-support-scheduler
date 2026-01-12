@@ -17,12 +17,13 @@
     <main class="content">
         <section class="detail-card">
 
-            <!-- 제목 + 상단배지 + 관리버튼 -->
+            <!-- =========================
+                 헤더(제목/버튼)
+            ========================== -->
             <div class="detail-head">
                 <div class="detail-title">
                     <span th:if="${notice.isTop == 1 or notice.isTop == '1'}"
                           class="badge badge-top">상단</span>
-
                     <h2 th:text="${notice.title}">제목</h2>
                 </div>
 
@@ -42,18 +43,18 @@
                 </div>
             </div>
 
-            <!-- 메타 -->
+            <!-- =========================
+                 메타(작성자/작성일/조회수)
+            ========================== -->
             <div class="detail-meta">
                 <div class="meta-item">
                     <span class="meta-label">작성자</span>
-                    <span class="meta-value"
-                          th:text="${notice.writer != null ? notice.writer : 'admin'}">admin</span>
+                    <span class="meta-value" th:text="${notice.writer != null ? notice.writer : 'admin'}">admin</span>
                 </div>
 
                 <div class="meta-item">
                     <span class="meta-label">작성일</span>
-                    <span class="meta-value"
-                          th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}">2025-12-23</span>
+                    <span class="meta-value" th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}">2025-12-23</span>
                 </div>
 
                 <div class="meta-item">
@@ -63,19 +64,45 @@
 
                 <div class="meta-item" th:if="${notice.updatedAt != null}">
                     <span class="meta-label">수정일</span>
-                    <span class="meta-value"
-                          th:text="${#temporals.format(notice.updatedAt, 'yyyy-MM-dd HH:mm')}">-</span>
+                    <span class="meta-value" th:text="${#temporals.format(notice.updatedAt, 'yyyy-MM-dd HH:mm')}">-</span>
                 </div>
             </div>
 
-            <!-- 본문 -->
+            <!-- =========================
+                 본문
+            ========================== -->
             <div class="detail-body">
                 <p class="detail-content" th:text="${notice.content}">내용</p>
             </div>
 
-            <!-- 이전글/다음글 + 댓글 -->
-            <div class="detail-nav" style="margin-top:22px; display:grid; gap:8px;">
+            <!-- =========================
+                 첨부파일(댓글과 분리)
+            ========================== -->
+            <div class="card attach-card" style="margin-top:16px;">
+                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-weight:700;">첨부파일</div>
+                    <div style="opacity:.7; font-size:12px;"
+                         th:text="${files == null ? '0개' : #lists.size(files) + '개'}">0개</div>
+                </div>
 
+                <div class="card-body" style="padding:12px;">
+                    <div th:if="${files == null or #lists.isEmpty(files)}" style="opacity:.8;">
+                        첨부파일이 없습니다.
+                    </div>
+
+                    <ul th:if="${files != null and !#lists.isEmpty(files)}" style="margin:0; padding-left:18px;">
+                        <li th:each="f : ${files}" style="margin:6px 0;">
+                            <a th:href="@{/support/notice/file(noticeId=${notice.noticeId}, name=${f})}"
+                               th:text="${#strings.substringAfter(f, '__')}">파일명</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- =========================
+                 이전/다음 글
+            ========================== -->
+            <div class="detail-nav" style="margin-top:18px; display:grid; gap:8px;">
                 <div>
                     이전글 :
                     <span th:if="${prevNotice == null}">없음</span>
@@ -91,94 +118,86 @@
                        th:href="@{/support/notice/detail(noticeId=${nextNotice.noticeId})}"
                        th:text="${nextNotice.title}">다음글</a>
                 </div>
+            </div>
 
-                <!-- ===== 댓글 카드(정렬 개선 버전) ===== -->
-                <div class="card comment-card">
-                    <div class="card-header comment-card-header">
-                        <div class="comment-card-title">
-                            댓글 <span th:text="${#lists.size(comments)}">0</span>개
-                        </div>
+            <!-- =========================
+                 댓글 카드(댓글만)
+            ========================== -->
+            <div class="card comment-card" style="margin-top:18px;">
+                <div class="card-header comment-card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="comment-card-title">
+                        댓글 <span th:text="${#lists.size(comments)}">0</span>개
+                    </div>
+                </div>
+
+                <!-- 댓글 목록 -->
+                <div class="comment-list" style="padding:12px;">
+                    <div class="comment-empty" th:if="${#lists.isEmpty(comments)}" style="opacity:.8;">
+                        등록된 댓글이 없습니다.
                     </div>
 
-                    <!-- 댓글 목록 -->
-                    <div class="comment-list">
-
-                        <!-- 비어있을 때 -->
-                        <div class="comment-empty" th:if="${#lists.isEmpty(comments)}">
-                            등록된 댓글이 없습니다.
-                        </div>
-
-                        <!-- 댓글 1개 -->
-                        <div class="comment-item" th:each="c : ${comments}">
-                            <!-- 왼쪽: 작성자/시간 + 내용 -->
-                            <div class="comment-left">
-                                <div class="comment-top">
-                                    <span class="comment-author" th:text="${c.writer}">admin</span>
-
-                                    <!-- createdAt이 있다면 표시 (VO에 없으면 이 span 통째로 삭제해도 됨) -->
-                                    <span class="comment-date"
-                                          th:if="${c.createdAt != null}"
-                                          th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-10 19:40</span>
-                                </div>
-
-                                <div class="comment-content" th:text="${c.content}">내용</div>
+                    <div class="comment-item" th:each="c : ${comments}"
+                         style="display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid rgba(0,0,0,.06);">
+                        <div class="comment-left" style="flex:1;">
+                            <div class="comment-top" style="display:flex; gap:10px; align-items:center;">
+                                <span class="comment-author" th:text="${c.writer}" style="font-weight:700;">admin</span>
+                                <span class="comment-date"
+                                      th:if="${c.createdAt != null}"
+                                      th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}"
+                                      style="opacity:.7; font-size:12px;">2026-01-10 19:40</span>
                             </div>
+                            <div class="comment-content" th:text="${c.content}" style="margin-top:6px;">내용</div>
+                        </div>
 
-                            <!-- 오른쪽: 좋아요 + 수정/삭제 -->
-                            <div class="comment-right">
-                                <!-- 좋아요(AJAX 그대로) -->
-                                <button type="button" class="btn btn-outline-danger btn-sm comment-like"
-                                        th:onclick="|toggleLike(${c.commentId})|">
-                                    <i th:id="|heart-icon-${c.commentId}|" class="bi bi-heart"></i>
-                                    <span th:id="|like-count-${c.commentId}|" th:text="${c.likeCount}">0</span>
-                                </button>
+                        <div class="comment-right" style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+                            <button type="button" class="btn btn-outline-danger btn-sm comment-like"
+                                    th:onclick="|toggleLike(${c.commentId})|">
+                                <i th:id="|heart-icon-${c.commentId}|" class="bi bi-heart"></i>
+                                <span th:id="|like-count-${c.commentId}|" th:text="${c.likeCount}">0</span>
+                            </button>
 
-                                <!-- 수정/삭제: 로그인 + (본인 or ADMIN)만 -->
-                                <div class="comment-manage"
-                                     th:if="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.loginId == c.writer)}">
+                            <div class="comment-manage"
+                                 th:if="${session.LOGIN_USER != null and (session.LOGIN_USER.role == 'ROLE_ADMIN' or session.LOGIN_USER.loginId == c.writer)}"
+                                 style="display:flex; gap:6px;">
+                                <a class="btn btn-outline-primary btn-sm"
+                                   th:href="@{/support/notice/comment/editForm(commentId=${c.commentId}, noticeId=${notice.noticeId})}">
+                                    수정
+                                </a>
 
-                                    <a class="btn btn-outline-primary btn-sm"
-                                       th:href="@{/support/notice/comment/editForm(commentId=${c.commentId}, noticeId=${notice.noticeId})}">
-                                        수정
-                                    </a>
-
-                                    <form class="comment-delete-form"
-                                          th:action="@{/support/notice/comment/delete}" method="post"
-                                          onsubmit="return confirm('댓글을 삭제할까요?');">
-                                        <input type="hidden" name="commentId" th:value="${c.commentId}">
-                                        <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm">삭제</button>
-                                    </form>
-                                </div>
+                                <form class="comment-delete-form"
+                                      th:action="@{/support/notice/comment/delete}" method="post"
+                                      onsubmit="return confirm('댓글을 삭제할까요?');"
+                                      style="display:inline;">
+                                    <input type="hidden" name="commentId" th:value="${c.commentId}">
+                                    <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">삭제</button>
+                                </form>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- 댓글 작성 -->
-                    <div class="comment-form-wrap">
-                        <!-- 로그인한 경우만 댓글 입력 -->
-                        <div th:if="${session.LOGIN_USER != null}">
-                            <form th:action="@{/support/notice/comment/add}" method="post" class="comment-form">
-                                <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
-
-                                <textarea class="comment-textarea" name="content" rows="2"
-                                          placeholder="댓글을 입력하세요..." required></textarea>
-
-                                <button class="btn btn-dark comment-submit" type="submit">등록</button>
-                            </form>
-                        </div>
-
-                        <!-- 비로그인: 안내 + 로그인 링크 -->
-                        <div th:if="${session.LOGIN_USER == null}" class="comment-login-hint">
-                            댓글 작성은 로그인 후 가능합니다.
-                            <a class="btn btn-sm btn-outline-primary" th:href="@{/login}">로그인</a>
                         </div>
                     </div>
                 </div>
-                <!-- ===== 댓글 카드 끝 ===== -->
 
+                <!-- 댓글 작성 -->
+                <div class="comment-form-wrap" style="padding:12px; border-top:1px solid rgba(0,0,0,.06);">
+                    <div th:if="${session.LOGIN_USER != null}">
+                        <form th:action="@{/support/notice/comment/add}" method="post" class="comment-form"
+                              style="display:flex; gap:10px; align-items:flex-start;">
+                            <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+
+                            <textarea class="comment-textarea" name="content" rows="2"
+                                      placeholder="댓글을 입력하세요..." required
+                                      style="flex:1;"></textarea>
+
+                            <button class="btn btn-dark comment-submit" type="submit">등록</button>
+                        </form>
+                    </div>
+
+                    <div th:if="${session.LOGIN_USER == null}" class="comment-login-hint" style="opacity:.85;">
+                        댓글 작성은 로그인 후 가능합니다.
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/login}">로그인</a>
+                    </div>
+                </div>
             </div>
-            <!-- detail-nav 끝 -->
 
         </section>
     </main>
@@ -186,7 +205,6 @@
     <div th:replace="~{comm/footer :: footer}"></div>
 </div>
 
-<!-- 스크립트는 body 끝에 두는게 안전 -->
 <script src="/js/jquery-3.7.1.js"></script>
 <script>
     function toggleLike(commentId) {
@@ -194,7 +212,6 @@
             type: "POST",
             url: "/support/notice/comment/like",
             data: { "commentId": commentId },
-
             success: function(response) {
                 if (response.result === "LOGIN_REQUIRED") {
                     alert("로그인이 필요합니다!");

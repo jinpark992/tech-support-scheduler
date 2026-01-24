@@ -58,30 +58,31 @@ public class NoticeSvc {
 
     public NoticePageResult doSearchPaged(String field, String q, String topOnly, String sort, int page, int size) {
 
-        // ✅ 검색어 정리(공백 제거 + 공백만이면 null 처리)
+        // 검색어 정리(공백 제거 + 공백만이면 null 처리)
         if (q != null) q = q.trim();
         if (q != null && q.isBlank()) q = null;
 
-        // ✅ 1) COUNT용 파라미터(검색/상단 조건 동일해야 함)
+        // 1) COUNT용 파라미터(검색/상단 조건 동일해야 함)
+        // Dao에서 key값 설정을 위해 사용.
         Map<String, Object> p = new HashMap<>();
         p.put("field", field);
         p.put("q", q);
         p.put("topOnly", topOnly);
         p.put("sort", sort);
 
-        // ✅ 2) 전체 글 수 먼저 구함 (이게 있어야 총페이지 계산 가능)
+        //  2) 전체 글 수 먼저 구함 (이게 있어야 총페이지 계산 가능)
         int totalCount = noticeDao.countSearch(p);
 
-        // ✅ 3) PageInfo가 totalPages, offset 계산
+        // 3) PageInfo가 totalPages, offset 계산
         PageInfo pageInfo = new PageInfo(page, size, totalCount);
 
-        // ✅ 4) 목록 조회용 파라미터에 LIMIT/OFFSET 추가
+        //  4) PageInfo의 size 와 offset(DB에서 가져올 때 앞부분에서 건너뛸 데이터의 개수)을 넘겨주기 위한 서비스
         p.put("size", pageInfo.getSize());
         p.put("offset", pageInfo.getOffset());
 
         List<Notice> notices = noticeDao.searchPaged(p);
 
-        // ✅ 5) 화면으로 보낼 “결과 박스” 리턴
+        //  5) 화면으로 보낼 “결과 박스” 리턴
         return new NoticePageResult(notices, pageInfo, q);
     }
 

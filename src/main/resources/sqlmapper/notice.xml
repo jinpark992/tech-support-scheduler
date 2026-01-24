@@ -67,7 +67,7 @@
         LIMIT 1
     </select>
 
-    <!-- ✅ 1) COUNT -->
+    <!-- 1)countSearch (전체 글 개수 세기)-->
     <select id="countSearch" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM notice
@@ -99,7 +99,7 @@
         </if>
     </select>
 
-    <!-- ✅ 2) 현재 페이지 목록 -->
+    <!-- ✅ 2) 현재 페이지 목록 검색 -->
     <select id="searchPaged" parameterType="map" resultType="com.boot.techsupportscheduler.support.vo.Notice">
         SELECT notice_id, is_top, title, writer, writer_user_id, content, views,
         created_at, updated_at, deleted_yn, deleted_at

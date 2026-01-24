@@ -172,7 +172,7 @@
             <div class="pager" th:if="${pageInfo != null}">
                 <!-- 맨앞 -->
                 <button type="button" class="page-btn"
-                        th:disabled="${pageInfo.page == 1 or pageInfo.totalPages == 0}"
+                            th:disabled="${pageInfo.page == 1 or pageInfo.totalPages == 0}"
                         th:onclick="|goPage(1)|">«</button>
 
                 <!-- 이전 -->
